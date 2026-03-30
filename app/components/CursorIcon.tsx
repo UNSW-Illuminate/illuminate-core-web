@@ -1,0 +1,21 @@
+export const CursorIcon = ({ size = 24, className = '' }: { size?: number; className?: string }) => (
+  <svg
+    viewBox="0 0 8.3 8.44"
+    width={size}
+    height={size}
+    xmlns="http://www.w3.org/2000/svg"
+    className={className}
+    style={{ display: 'block' }}
+  >
+    <g>
+      <rect fill="white" x="5.92" y="0.38" width="1.31" height="1.31" transform="translate(1.13 4.86) rotate(-44.07)" />
+      <polygon
+        fill="white"
+        points="8.3 7.53 7.35 8.44 6.45 7.5 5.54 6.56 4.64 5.61 3.73 4.67 2.83 3.73 1.92 2.79 .98 3.69 .08 2.75 1.02 1.85 .11 .91 1.06 0 1.96 .94 2.9 .04 3.81 .98 2.87 1.88 3.77 2.83 4.68 3.77 5.58 4.71 6.49 5.65 7.39 6.59 8.3 7.53"
+      />
+      <rect fill="white" x="0.31" y="3.96" width="1.3" height="1.31" transform="translate(-2.94 1.97) rotate(-44.07)" />
+      <rect fill="white" x="0.27" y="5.81" width="1.31" height="1.3" transform="translate(-4.21 2.44) rotate(-43.77)" />
+      <rect fill="white" x="4.08" y="0.35" width="1.3" height="1.31" transform="translate(.62 3.55) rotate(-43.76)" />
+    </g>
+  </svg>
+);
