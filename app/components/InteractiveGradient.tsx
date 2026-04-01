@@ -1,30 +1,18 @@
 'use client';
 
 import ShaderGradient from './ShaderGradient';
-import SettingsPanel from './SettingsPanel';
 import { useShaderSettings } from '@/app/hooks/useShaderSettings';
+import { useScrollColor } from '@/app/hooks/useScrollColor';
 
 export default function InteractiveGradient() {
-  const {
-    settings,
-    updateSetting,
-    saveDefaults,
-    resetToDefaults,
-    isOpen,
-    setIsOpen,
-  } = useShaderSettings();
+  const { settings } = useShaderSettings();
+  const { currentColor, currentColorRgb } = useScrollColor();
 
   return (
-    <>
-      <ShaderGradient settings={settings} />
-      <SettingsPanel
-        settings={settings}
-        onUpdateSetting={updateSetting}
-        onSaveDefaults={saveDefaults}
-        onResetDefaults={resetToDefaults}
-        isOpen={isOpen}
-        setIsOpen={setIsOpen}
-      />
-    </>
+    <ShaderGradient 
+      settings={settings} 
+      scrollColor={currentColor}
+      scrollColorRgb={currentColorRgb}
+    />
   );
 }

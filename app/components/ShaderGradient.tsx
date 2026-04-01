@@ -3,7 +3,15 @@
 import { useEffect, useRef } from 'react';
 import { ShaderSettings } from '@/app/hooks/useShaderSettings';
 
-export default function ShaderGradient({ settings }: { settings: ShaderSettings }) {
+export default function ShaderGradient({ 
+  settings, 
+  scrollColor,
+  scrollColorRgb 
+}: { 
+  settings: ShaderSettings;
+  scrollColor?: { hue: number; saturation: number; lightness: number };
+  scrollColorRgb?: [number, number, number];
+}) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const mousePosRef = useRef({ x: 0, y: 0 });
   const smoothMousePosRef = useRef({ x: 0, y: 0 });
@@ -275,6 +283,16 @@ export default function ShaderGradient({ settings }: { settings: ShaderSettings 
       ] : [1, 0, 0];
     };
 
+    // Helper function to convert HSL to RGB normalized
+    const hslToRgbNormalized = (h: number, s: number, l: number): [number, number, number] => {
+      s /= 100;
+      l /= 100;
+      const k = (n: number) => (n + h / 30) % 12;
+      const a = s * Math.min(l, 1 - l);
+      const f = (n: number) => l - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1)));
+      return [f(0), f(8), f(4)];
+    };
+
     // Animation loop
     const animate = () => {
       const elapsed = (Date.now() - startTime) / 1000;
@@ -301,10 +319,35 @@ export default function ShaderGradient({ settings }: { settings: ShaderSettings 
       gl.uniform1f(uRippleIntensityLocation, settings.rippleIntensity);
       gl.uniform1i(uColorModeLocation, settings.colorMode === 'spectral' ? 0 : 1);
 
-      // Set custom colors
-      const col1 = hexToRgb(settings.customColor1);
-      const col2 = hexToRgb(settings.customColor2);
-      const col3 = hexToRgb(settings.customColor3);
+      // Set custom colors - use scroll colors if available, otherwise use settings
+      let col1: [number, number, number];
+      let col2: [number, number, number];
+      let col3: [number, number, number];
+
+      if (scrollColorRgb && scrollColor) {
+        // Generate complementary colors from scroll color hue
+        const baseHue = scrollColor.hue;
+        const sat = scrollColor.saturation;
+        const light = scrollColor.lightness;
+        
+        // Generate three colors spaced around the color wheel
+        col1 = scrollColorRgb;
+        col2 = hslToRgbNormalized(
+          (baseHue + 120) % 360,
+          Math.min(sat + 10, 100),
+          Math.max(light - 10, 20)
+        );
+        col3 = hslToRgbNormalized(
+          (baseHue + 240) % 360,
+          Math.min(sat + 10, 100),
+          Math.min(light + 10, 80)
+        );
+      } else {
+        col1 = hexToRgb(settings.customColor1);
+        col2 = hexToRgb(settings.customColor2);
+        col3 = hexToRgb(settings.customColor3);
+      }
+
       gl.uniform3f(uColor1Location, col1[0], col1[1], col1[2]);
       gl.uniform3f(uColor2Location, col2[0], col2[1], col2[2]);
       gl.uniform3f(uColor3Location, col3[0], col3[1], col3[2]);
@@ -338,7 +381,7 @@ export default function ShaderGradient({ settings }: { settings: ShaderSettings 
   return (
     <canvas
       ref={canvasRef}
-      className="fixed inset-0 w-full h-full block"
+      className="fixed inset-0 w-full h-full pointer-events-none"
     />
   );
 }
