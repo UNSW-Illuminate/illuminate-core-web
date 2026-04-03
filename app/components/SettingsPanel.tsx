@@ -87,6 +87,75 @@ export default function SettingsPanel({
             </>
           )}
 
+          {/* Spectral Controls */}
+          {settings.colorMode === 'spectral' && (
+            <>
+              <div className="mb-4">
+                <label className="text-white text-sm block mb-2">
+                  Spectral Hue Shift: {settings.spectralHueShift.toFixed(0)}nm
+                </label>
+                <input
+                  type="range"
+                  min="-120"
+                  max="120"
+                  step="1"
+                  value={settings.spectralHueShift}
+                  onChange={(e) => onUpdateSetting('spectralHueShift', parseFloat(e.target.value))}
+                  title="Shift the spectral wavelength center"
+                  className="w-full"
+                />
+              </div>
+
+              <div className="mb-4">
+                <label className="text-white text-sm block mb-2">
+                  Spectral Scale: {settings.spectralScale.toFixed(0)}
+                </label>
+                <input
+                  type="range"
+                  min="15"
+                  max="120"
+                  step="1"
+                  value={settings.spectralScale}
+                  onChange={(e) => onUpdateSetting('spectralScale', parseFloat(e.target.value))}
+                  title="Control how quickly wavelengths change across the gradient"
+                  className="w-full"
+                />
+              </div>
+
+              <div className="mb-4">
+                <label className="text-white text-sm block mb-2">
+                  Spectral Time Shift: {settings.spectralTimeShift.toFixed(0)}
+                </label>
+                <input
+                  type="range"
+                  min="0"
+                  max="80"
+                  step="1"
+                  value={settings.spectralTimeShift}
+                  onChange={(e) => onUpdateSetting('spectralTimeShift', parseFloat(e.target.value))}
+                  title="Set temporal wavelength drift amount"
+                  className="w-full"
+                />
+              </div>
+
+              <div className="mb-4">
+                <label className="text-white text-sm block mb-2">
+                  Spectral Saturation: {settings.spectralSaturation.toFixed(2)}
+                </label>
+                <input
+                  type="range"
+                  min="0"
+                  max="2"
+                  step="0.05"
+                  value={settings.spectralSaturation}
+                  onChange={(e) => onUpdateSetting('spectralSaturation', parseFloat(e.target.value))}
+                  title="Adjust spectral color saturation"
+                  className="w-full"
+                />
+              </div>
+            </>
+          )}
+
           {/* Animation Speed */}
           <div className="mb-4">
             <label className="text-white text-sm block mb-2">

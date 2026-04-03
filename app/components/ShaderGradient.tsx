@@ -15,9 +15,16 @@ export default function ShaderGradient({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const mousePosRef = useRef({ x: 0, y: 0 });
   const smoothMousePosRef = useRef({ x: 0, y: 0 });
+  const scrollColorRef = useRef(scrollColor);
+  const scrollColorRgbRef = useRef(scrollColorRgb);
   const mouseTrailRef = useRef<Array<{ x: number; y: number }>>(
     Array(8).fill({ x: 0, y: 0 })
   );
+
+  useEffect(() => {
+    scrollColorRef.current = scrollColor;
+    scrollColorRgbRef.current = scrollColorRgb;
+  }, [scrollColor, scrollColorRgb]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -74,6 +81,10 @@ export default function ShaderGradient({
     uniform float uCircleRadius;
     uniform float uRippleIntensity;
     uniform int uColorMode;
+    uniform float uSpectralHueShift;
+    uniform float uSpectralScale;
+    uniform float uSpectralTimeShift;
+    uniform float uSpectralSaturation;
     uniform vec3 uColor1;
     uniform vec3 uColor2;
     uniform vec3 uColor3;
@@ -111,25 +122,36 @@ export default function ShaderGradient({
       return fract(sin(dot(uv, vec2(12.9898, 78.233))) * 43758.5453);
     }
 
+    vec3 applySaturation(vec3 c, float s) {
+      float luma = dot(c, vec3(0.2126, 0.7152, 0.0722));
+      return mix(vec3(luma), c, s);
+    }
+
     void main() {
       vec2 fragCoord = gl_FragCoord.xy;
       vec2 p = (2.0 * fragCoord - iResolution) / min(iResolution.x, iResolution.y);
       p *= 2.0;
 
-      // Calculate normalized mouse position for enhanced hover effect
-      vec2 mouseNorm = iMouse / iResolution;
+      // Use smoothed cursor position and a bounded warp field.
+      // This avoids singularities that can create detached sharp points near the cursor.
+      vec2 mouseNorm = iSmoothedMouse / iResolution;
       mouseNorm = (2.0 * mouseNorm - 1.0) * vec2(iResolution.x / iResolution.y, 1.0);
-      
-      // Distance from current fragment to mouse position
-      float distToMouse = distance(p, mouseNorm);
-      float mouseProximity = exp(-distToMouse * distToMouse * 2.0);
-      
-      // Enhanced mouse influence on animation with proximity-based intensity
-      float mouseInfluence = sin(mouseNorm.x * 0.5 + iTime * 0.1) * 0.2 * mouseProximity;
-      float mouseInfluenceY = cos(mouseNorm.y * 0.5 + iTime * 0.1) * 0.2 * mouseProximity;
-      
-      // Directional displacement toward mouse for hover effect
-      vec2 mouseDisplace = normalize(mouseNorm - p) * mouseProximity * 0.3;
+
+      vec2 toMouse = p - mouseNorm;
+      float distToMouse2 = dot(toMouse, toMouse);
+      float distToMouse = sqrt(distToMouse2 + 1e-6);
+      float mouseProximity = exp(-distToMouse2 * 1.8);
+
+      // Swirl + radial pinch with gaussian falloff produces smooth, stable distortion.
+      vec2 swirlDir = vec2(-toMouse.y, toMouse.x);
+      vec2 radialDir = toMouse / (distToMouse + 0.35);
+      vec2 swirlWarp = swirlDir * (0.22 * mouseProximity);
+      vec2 radialWarp = -radialDir * (0.12 * mouseProximity);
+      float pulse = sin(distToMouse * 10.0 - iTime * 1.1) * 0.02 * mouseProximity;
+      vec2 mouseDisplace = swirlWarp + radialWarp + radialDir * pulse;
+
+      float mouseInfluence = sin(mouseNorm.x * 0.45 + iTime * 0.08) * 0.16 * mouseProximity;
+      float mouseInfluenceY = cos(mouseNorm.y * 0.45 + iTime * 0.08) * 0.16 * mouseProximity;
 
       // Calculate minimum distance to trail and accumulate falloff effect
       float minDistFromTrail = 10000.0;
@@ -162,14 +184,15 @@ export default function ShaderGradient({
       // Apply modulation with trail falloff and enhanced hover distortion
       vec2 modulatedP = mix(
         transformedP, 
-        transformedP + vec2(ripple * 3.0, ripple * 3.0) + mouseDisplace * 2.0, 
+        transformedP + vec2(ripple * 3.0, ripple * 3.0) + mouseDisplace * 1.5, 
         borderMask * (1.0 + trailInfluence * 0.5 + mouseProximity * 0.8)
       );
 
       // Get base color from palette
       vec3 color;
       if (uColorMode == 0) {
-        color = spectral_colour(modulatedP.y * 50.0 + 500.0 + sin(iTime * 0.15 * uAnimationSpeed));
+        float wave = modulatedP.y * uSpectralScale + (500.0 + uSpectralHueShift) + sin(iTime * 0.15 * uAnimationSpeed) * uSpectralTimeShift;
+        color = applySaturation(spectral_colour(wave), uSpectralSaturation);
       } else {
         color = customColor(modulatedP.y * 2.0 + sin(iTime * 0.2 * uAnimationSpeed) * 0.5);
       }
@@ -181,7 +204,8 @@ export default function ShaderGradient({
       // Add subtle blur via multiple samples
       vec3 blurred = color;
       if (uColorMode == 0) {
-        blurred += spectral_colour(modulatedP.y * 50.0 + 500.0 + sin((iTime + 0.1) * 0.15 * uAnimationSpeed)) * 0.1;
+        float blurWave = modulatedP.y * uSpectralScale + (500.0 + uSpectralHueShift) + sin((iTime + 0.1) * 0.15 * uAnimationSpeed) * uSpectralTimeShift;
+        blurred += applySaturation(spectral_colour(blurWave), uSpectralSaturation) * 0.1;
       } else {
         blurred += customColor(modulatedP.y * 2.0 + sin((iTime + 0.1) * 0.2 * uAnimationSpeed) * 0.5) * 0.1;
       }
@@ -259,6 +283,10 @@ export default function ShaderGradient({
     const uCircleRadiusLocation = gl.getUniformLocation(program, 'uCircleRadius');
     const uRippleIntensityLocation = gl.getUniformLocation(program, 'uRippleIntensity');
     const uColorModeLocation = gl.getUniformLocation(program, 'uColorMode');
+    const uSpectralHueShiftLocation = gl.getUniformLocation(program, 'uSpectralHueShift');
+    const uSpectralScaleLocation = gl.getUniformLocation(program, 'uSpectralScale');
+    const uSpectralTimeShiftLocation = gl.getUniformLocation(program, 'uSpectralTimeShift');
+    const uSpectralSaturationLocation = gl.getUniformLocation(program, 'uSpectralSaturation');
     const uColor1Location = gl.getUniformLocation(program, 'uColor1');
     const uColor2Location = gl.getUniformLocation(program, 'uColor2');
     const uColor3Location = gl.getUniformLocation(program, 'uColor3');
@@ -274,13 +302,13 @@ export default function ShaderGradient({
     let startTime = Date.now();
 
     // Helper function to convert hex to RGB
-    const hexToRgb = (hex: string) => {
+    const hexToRgb = (hex: string): [number, number, number] => {
       const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
       return result ? [
         parseInt(result[1], 16) / 255,
         parseInt(result[2], 16) / 255,
         parseInt(result[3], 16) / 255
-      ] : [1, 0, 0];
+      ] as [number, number, number] : [1, 0, 0];
     };
 
     // Helper function to convert HSL to RGB normalized
@@ -319,19 +347,30 @@ export default function ShaderGradient({
       gl.uniform1f(uRippleIntensityLocation, settings.rippleIntensity);
       gl.uniform1i(uColorModeLocation, settings.colorMode === 'spectral' ? 0 : 1);
 
-      // Set custom colors - use scroll colors if available, otherwise use settings
+      // In spectral mode, derive palette from scroll color.
+      // In custom mode, always use the user-selected settings colors.
       let col1: [number, number, number];
       let col2: [number, number, number];
       let col3: [number, number, number];
 
-      if (scrollColorRgb && scrollColor) {
+      const activeScrollColor = scrollColorRef.current;
+      const activeScrollColorRgb = scrollColorRgbRef.current;
+      const scrollHueShift = activeScrollColor ? ((activeScrollColor.hue / 360) * 240 - 120) : 0;
+      const combinedSpectralShift = settings.spectralHueShift + scrollHueShift;
+
+      gl.uniform1f(uSpectralHueShiftLocation, combinedSpectralShift);
+      gl.uniform1f(uSpectralScaleLocation, settings.spectralScale);
+      gl.uniform1f(uSpectralTimeShiftLocation, settings.spectralTimeShift);
+      gl.uniform1f(uSpectralSaturationLocation, settings.spectralSaturation);
+
+      if (settings.colorMode === 'spectral' && activeScrollColorRgb && activeScrollColor) {
         // Generate complementary colors from scroll color hue
-        const baseHue = scrollColor.hue;
-        const sat = scrollColor.saturation;
-        const light = scrollColor.lightness;
+        const baseHue = activeScrollColor.hue;
+        const sat = activeScrollColor.saturation;
+        const light = activeScrollColor.lightness;
         
         // Generate three colors spaced around the color wheel
-        col1 = scrollColorRgb;
+        col1 = activeScrollColorRgb;
         col2 = hslToRgbNormalized(
           (baseHue + 120) % 360,
           Math.min(sat + 10, 100),

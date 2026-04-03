@@ -6,110 +6,110 @@ export interface SectionColor {
   lightness: number;
 }
 
-interface ScrollSection {
+interface ScrollFrame {
   id: string;
-  start: number;
-  end: number;
-  color: SectionColor;
+  start: number; // normalized 0..1
+  end: number; // normalized 0..1
+  from: SectionColor;
+  to: SectionColor;
   name: string;
 }
 
-// Define color sections - hue in 0-360 range
-const SECTIONS: ScrollSection[] = [
+// Frame-based color progression across the page.
+// Each frame clamps hue to a bounded range and interpolates within that range.
+const FRAMES: ScrollFrame[] = [
   {
-    id: 'hero',
+    id: 'intro',
     start: 0,
-    end: 1200,
-    name: 'Hero',
-    color: { hue: 280, saturation: 70, lightness: 50 }, // Purple
+    end: 0.2,
+    name: 'Intro',
+    from: { hue: 252, saturation: 72, lightness: 50 },
+    to: { hue: 282, saturation: 74, lightness: 53 },
+  },
+  {
+    id: 'showcase',
+    start: 0.2,
+    end: 0.4,
+    name: 'Showcase',
+    from: { hue: 282, saturation: 74, lightness: 53 },
+    to: { hue: 210, saturation: 70, lightness: 48 },
   },
   {
     id: 'projects',
-    start: 1200,
-    end: 3000,
+    start: 0.4,
+    end: 0.6,
     name: 'Past Projects',
-    color: { hue: 20, saturation: 75, lightness: 50 }, // Orange
+    from: { hue: 210, saturation: 70, lightness: 48 },
+    to: { hue: 36, saturation: 80, lightness: 54 },
   },
   {
     id: 'team',
-    start: 3000,
-    end: 5000,
+    start: 0.6,
+    end: 0.8,
     name: 'Team',
-    color: { hue: 150, saturation: 70, lightness: 50 }, // Cyan/Teal
+    from: { hue: 36, saturation: 80, lightness: 54 },
+    to: { hue: 148, saturation: 72, lightness: 50 },
   },
   {
-    id: 'footer',
-    start: 5000,
-    end: 6000,
-    name: 'Footer',
-    color: { hue: 260, saturation: 65, lightness: 45 }, // Deep Purple
+    id: 'contact',
+    start: 0.8,
+    end: 1,
+    name: 'Contact',
+    from: { hue: 148, saturation: 72, lightness: 50 },
+    to: { hue: 320, saturation: 68, lightness: 47 },
   },
 ];
 
+function lerpHue(a: number, b: number, t: number): number {
+  let diff = b - a;
+  if (diff > 180) diff -= 360;
+  if (diff < -180) diff += 360;
+  return (a + diff * t + 360) % 360;
+}
+
+function mixColor(from: SectionColor, to: SectionColor, t: number): SectionColor {
+  return {
+    hue: lerpHue(from.hue, to.hue, t),
+    saturation: from.saturation + (to.saturation - from.saturation) * t,
+    lightness: from.lightness + (to.lightness - from.lightness) * t,
+  };
+}
+
 export function useScrollColor() {
-  const [currentColor, setCurrentColor] = useState<SectionColor>(SECTIONS[0].color);
-  const [currentSection, setCurrentSection] = useState<string>(SECTIONS[0].id);
+  const [currentColor, setCurrentColor] = useState<SectionColor>(FRAMES[0].from);
+  const [currentSection, setCurrentSection] = useState<string>(FRAMES[0].id);
   const [scrollProgress, setScrollProgress] = useState(0);
   const scrollListenerRef = useRef<(() => void) | null>(null);
 
   useEffect(() => {
     const handleScroll = () => {
       const scrollY = window.scrollY;
-      setScrollProgress(scrollY);
+      const maxScroll = Math.max(document.documentElement.scrollHeight - window.innerHeight, 1);
+      const progress = Math.min(Math.max(scrollY / maxScroll, 0), 1);
+      setScrollProgress(progress);
 
-      // Find current section and interpolate between colors
-      let foundSection = false;
-      
-      for (let i = 0; i < SECTIONS.length; i++) {
-        const section = SECTIONS[i];
-        const nextSection = SECTIONS[i + 1];
+      const frame = FRAMES.find((f) => progress >= f.start && progress <= f.end) ?? FRAMES[FRAMES.length - 1];
+      const frameRange = Math.max(frame.end - frame.start, 1e-6);
+      const localT = Math.min(Math.max((progress - frame.start) / frameRange, 0), 1);
 
-        if (scrollY >= section.start && scrollY < section.end) {
-          setCurrentSection(section.id);
-          
-          // Interpolate color between current and next section if we're transitioning
-          if (nextSection && scrollY > section.start + 100) {
-            const sectionRange = section.end - section.start;
-            const scrollInSection = scrollY - section.start;
-            const transitionStart = sectionRange * 0.7; // Start transitioning at 70% through section
+      setCurrentSection(frame.id);
+      setCurrentColor(mixColor(frame.from, frame.to, localT));
 
-            if (scrollInSection > transitionStart) {
-              const transitionProgress = (scrollInSection - transitionStart) / (sectionRange * 0.3);
-              const t = Math.min(transitionProgress, 1);
-              
-              // Interpolate hue (handle wrap-around)
-              let hueDiff = nextSection.color.hue - section.color.hue;
-              if (hueDiff > 180) hueDiff -= 360;
-              if (hueDiff < -180) hueDiff += 360;
-              
-              const interpolatedColor: SectionColor = {
-                hue: (section.color.hue + hueDiff * t + 360) % 360,
-                saturation: section.color.saturation + (nextSection.color.saturation - section.color.saturation) * t,
-                lightness: section.color.lightness + (nextSection.color.lightness - section.color.lightness) * t,
-              };
-              
-              setCurrentColor(interpolatedColor);
-              foundSection = true;
-              break;
-            }
-          }
-          
-          setCurrentColor(section.color);
-          foundSection = true;
-          break;
-        }
+      if (progress <= FRAMES[0].start) {
+        setCurrentSection(FRAMES[0].id);
+        setCurrentColor(FRAMES[0].from);
       }
 
-      // If scrolled past all sections, use the last one
-      if (!foundSection) {
-        const lastSection = SECTIONS[SECTIONS.length - 1];
-        setCurrentSection(lastSection.id);
-        setCurrentColor(lastSection.color);
+      if (progress >= FRAMES[FRAMES.length - 1].end) {
+        const last = FRAMES[FRAMES.length - 1];
+        setCurrentSection(last.id);
+        setCurrentColor(last.to);
       }
     };
 
     scrollListenerRef.current = handleScroll;
     window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll();
 
     return () => {
       window.removeEventListener('scroll', handleScroll);
@@ -145,6 +145,6 @@ export function useScrollColor() {
     currentColorRgb: hslToRgbNormalized(currentColor.hue, currentColor.saturation, currentColor.lightness),
     currentSection,
     scrollProgress,
-    sections: SECTIONS,
+    sections: FRAMES,
   };
 }
