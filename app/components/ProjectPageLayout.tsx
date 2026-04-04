@@ -23,7 +23,7 @@ type ProjectPageLayoutProps = {
   location: string;
   dates: string;
   description: string;
-  heroImage: ProjectImage;
+  heroImage?: ProjectImage;
   galleryImages: ProjectImage[];
   discoverMoreProjects: DiscoverProject[];
 };
@@ -66,16 +66,18 @@ export default function ProjectPageLayout({
           </aside>
 
           <article className="md:col-span-3">
-            <div className="relative overflow-hidden ">
-              <Image
-                src={heroImage.src}
-                alt={heroImage.alt}
-                width={1800}
-                height={1200}
-                className="h-auto w-full object-cover"
-                priority
-              />
-            </div>
+            {heroImage && (
+              <div className="relative overflow-hidden ">
+                <Image
+                  src={heroImage.src}
+                  alt={heroImage.alt}
+                  width={1800}
+                  height={1200}
+                  className="h-auto w-full object-cover"
+                  priority
+                />
+              </div>
+            )}
 
             <div className="mt-6 flex flex-wrap items-center gap-6 text-base text-white">
               <p>{location}</p>
@@ -89,45 +91,47 @@ export default function ProjectPageLayout({
         </div>
       </ContentContainer>
 
-      <section className="mt-20">
-        <ContentContainer>
-        <SectionHeading as="h2" className="text-2xl md:text-3xl">Image Gallery</SectionHeading>
+      {galleryImages.length > 0 && (
+        <section className="mt-20">
+          <ContentContainer>
+            <SectionHeading as="h2" className="text-2xl md:text-3xl">Image Gallery</SectionHeading>
 
-        <div className="mt-8 space-y-8">
-          {galleryGroups.map((group, groupIndex) => (
-            <div key={`${group[0]?.src}-${groupIndex}`} className="space-y-4">
-              {group[0] && (
-                <div className="relative w-full overflow-hidden  ">
-                  <Image
-                    src={group[0].src}
-                    alt={group[0].alt}
-                    width={1800}
-                    height={1100}
-                    className="h-auto w-full object-cover"
-                  />
-                </div>
-              )}
-
-              {group.length > 1 && (
-                <div className="grid gap-4 md:grid-cols-2">
-                  {group.slice(1).map((image) => (
-                    <div key={image.src + image.alt} className="relative overflow-hidden ">
+            <div className="mt-8 space-y-8">
+              {galleryGroups.map((group, groupIndex) => (
+                <div key={`${group[0]?.src}-${groupIndex}`} className="space-y-4">
+                  {group[0] && (
+                    <div className="relative w-full overflow-hidden  ">
                       <Image
-                        src={image.src}
-                        alt={image.alt}
-                        width={900}
-                        height={650}
-                        className="h-full w-full object-cover"
+                        src={group[0].src}
+                        alt={group[0].alt}
+                        width={1800}
+                        height={1100}
+                        className="h-auto w-full object-cover"
                       />
                     </div>
-                  ))}
+                  )}
+
+                  {group.length > 1 && (
+                    <div className="grid gap-4 md:grid-cols-2">
+                      {group.slice(1).map((image) => (
+                        <div key={image.src + image.alt} className="relative overflow-hidden ">
+                          <Image
+                            src={image.src}
+                            alt={image.alt}
+                            width={900}
+                            height={650}
+                            className="h-full w-full object-cover"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
-              )}
+              ))}
             </div>
-          ))}
-        </div>
-        </ContentContainer>
-      </section>
+          </ContentContainer>
+        </section>
+      )}
 
       <section className="mt-20 pb-8">
         <ContentContainer>
