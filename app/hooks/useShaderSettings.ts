@@ -20,7 +20,7 @@ export interface ShaderSettings {
 
 export const DEFAULT_SETTINGS: ShaderSettings = {
   animationSpeed: 1.0,
-  grainIntensity: 0.15,
+  grainIntensity: 0.05,
   circleRadius: 200,
   trailDrag: 0.04,
   rippleIntensity: 0.4,

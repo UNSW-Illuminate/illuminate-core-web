@@ -6,13 +6,14 @@ import { useScrollColor } from '@/app/hooks/useScrollColor';
 
 export default function InteractiveGradient() {
   const { settings } = useShaderSettings();
-  const { currentColor, currentColorRgb } = useScrollColor();
+  const { currentColor, currentColorRgb, scrollProgress } = useScrollColor();
 
   return (
     <ShaderGradient 
       settings={settings} 
       scrollColor={currentColor}
       scrollColorRgb={currentColorRgb}
+      scrollProgress={scrollProgress}
     />
   );
 }

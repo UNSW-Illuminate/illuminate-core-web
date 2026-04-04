@@ -9,35 +9,43 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --brand-color: #FF34B1;
+}
+
 @layer components {
-  .nav-link {
-    @apply relative pb-1;
-  }
-
-  .nav-link::after {
-    content: '';
-    @apply absolute bottom-0 left-0 w-0 h-0.5 bg-white transition-all duration-300 ease-out;
-  }
-
-  .nav-link:hover::after {
-    @apply w-full;
-  }
 }
 
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  cursor: none;
   font-family: 'PP Neue Montreal', sans-serif;
+}
+
+::selection {
+  background: var(--brand-color);
+  color: #000;
+}
+
+::-moz-selection {
+  background: var(--brand-color);
+  color: #000;
 }
 
 html,
 body {
   width: 100%;
   overflow-x: hidden;
+  background: #000;
 }
 
-canvas {
-  cursor: none;
+@media (hover: hover) and (pointer: fine) {
+  * {
+    cursor: none;
+  }
+
+  canvas {
+    cursor: none;
+  }
 }

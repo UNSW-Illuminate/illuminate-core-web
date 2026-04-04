@@ -1,21 +1,55 @@
 export const CursorIcon = ({ size = 24, className = '' }: { size?: number; className?: string }) => (
   <svg
-    viewBox="0 0 8.3 8.44"
-    width={size}
-    height={size}
-    xmlns="http://www.w3.org/2000/svg"
-    className={className}
-    style={{ display: 'block' }}
-  >
-    <g>
-      <rect fill="white" x="5.92" y="0.38" width="1.31" height="1.31" transform="translate(1.13 4.86) rotate(-44.07)" />
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 32 32"
+      width={size}
+      height={size}
+      className={className}
+    >
+      {/* Diamond top-right */}
+      <rect
+        fill="white"
+        x="22.6"
+        y="1.6"
+        width="4.9"
+        height="4.9"
+        transform="rotate(-44.1 25.1 4.05)"
+      />
+
+      {/* Chain / zigzag polygon */}
       <polygon
         fill="white"
-        points="8.3 7.53 7.35 8.44 6.45 7.5 5.54 6.56 4.64 5.61 3.73 4.67 2.83 3.73 1.92 2.79 .98 3.69 .08 2.75 1.02 1.85 .11 .91 1.06 0 1.96 .94 2.9 .04 3.81 .98 2.87 1.88 3.77 2.83 4.68 3.77 5.58 4.71 6.49 5.65 7.39 6.59 8.3 7.53"
+        points="31.5 28.4 28 31.8 24.6 28.3 21.2 24.8 17.8 21.2 14.4 17.7 11.1 14.2 7.6 10.6 4.1 14 .8 10.5 4.3 7.1 .9 3.6 4.4 .2 7.8 3.7 11.3 .4 14.7 3.9 11.2 7.2 14.6 10.8 18 14.3 21.3 17.8 24.7 21.4 28.1 24.9 31.5 28.4"
       />
-      <rect fill="white" x="0.31" y="3.96" width="1.3" height="1.31" transform="translate(-2.94 1.97) rotate(-44.07)" />
-      <rect fill="white" x="0.27" y="5.81" width="1.31" height="1.3" transform="translate(-4.21 2.44) rotate(-43.77)" />
-      <rect fill="white" x="4.08" y="0.35" width="1.3" height="1.31" transform="translate(.62 3.55) rotate(-43.76)" />
-    </g>
-  </svg>
+
+      {/* Diamond middle-left */}
+      <rect
+        fill="white"
+        x="1.6"
+        y="15"
+        width="4.9"
+        height="4.9"
+        transform="rotate(-44.1 4.05 17.45)"
+      />
+
+      {/* Diamond bottom-left */}
+      <rect
+        fill="white"
+        x="1.5"
+        y="22"
+        width="4.9"
+        height="4.9"
+        transform="rotate(-43.8 3.95 24.45)"
+      />
+
+      {/* Diamond top-center */}
+      <rect
+        fill="white"
+        x="15.7"
+        y="1.5"
+        width="4.9"
+        height="4.9"
+        transform="rotate(-43.8 18.15 3.95)"
+      />
+    </svg>
 );

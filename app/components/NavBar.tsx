@@ -1,5 +1,7 @@
 'use client';
 
+import AnimatedTextLink from './ui/AnimatedTextLink';
+
 export default function NavBar() {
   const navItems = ['Projects', 'About', 'Team', 'Contact'];
 
@@ -14,13 +16,13 @@ export default function NavBar() {
       {/* Navigation Links */}
       <div className="flex gap-8">
         {navItems.map((item) => (
-          <a
+          <AnimatedTextLink
             key={item}
             href={`#${item.toLowerCase()}`}
-            className="nav-link text-white/80 hover:text-white transition-colors duration-300 text-sm  tracking-wider"
+            className="text-sm text-white/80 transition-colors duration-300 hover:text-white"
           >
             {item}
-          </a>
+          </AnimatedTextLink>
         ))}
       </div>
     </nav>

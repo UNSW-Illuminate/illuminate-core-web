@@ -6,17 +6,20 @@ import { ShaderSettings } from '@/app/hooks/useShaderSettings';
 export default function ShaderGradient({ 
   settings, 
   scrollColor,
-  scrollColorRgb 
+  scrollColorRgb,
+  scrollProgress = 0,
 }: { 
   settings: ShaderSettings;
   scrollColor?: { hue: number; saturation: number; lightness: number };
   scrollColorRgb?: [number, number, number];
+  scrollProgress?: number;
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const mousePosRef = useRef({ x: 0, y: 0 });
   const smoothMousePosRef = useRef({ x: 0, y: 0 });
   const scrollColorRef = useRef(scrollColor);
   const scrollColorRgbRef = useRef(scrollColorRgb);
+  const scrollProgressRef = useRef(scrollProgress);
   const mouseTrailRef = useRef<Array<{ x: number; y: number }>>(
     Array(8).fill({ x: 0, y: 0 })
   );
@@ -24,7 +27,8 @@ export default function ShaderGradient({
   useEffect(() => {
     scrollColorRef.current = scrollColor;
     scrollColorRgbRef.current = scrollColorRgb;
-  }, [scrollColor, scrollColorRgb]);
+    scrollProgressRef.current = scrollProgress;
+  }, [scrollColor, scrollColorRgb, scrollProgress]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -85,6 +89,7 @@ export default function ShaderGradient({
     uniform float uSpectralScale;
     uniform float uSpectralTimeShift;
     uniform float uSpectralSaturation;
+    uniform float uVerticalScrollOffset;
     uniform vec3 uColor1;
     uniform vec3 uColor2;
     uniform vec3 uColor3;
@@ -131,6 +136,7 @@ export default function ShaderGradient({
       vec2 fragCoord = gl_FragCoord.xy;
       vec2 p = (2.0 * fragCoord - iResolution) / min(iResolution.x, iResolution.y);
       p *= 2.0;
+      p.y -= uVerticalScrollOffset;
 
       // Use smoothed cursor position and a bounded warp field.
       // This avoids singularities that can create detached sharp points near the cursor.
@@ -287,6 +293,7 @@ export default function ShaderGradient({
     const uSpectralScaleLocation = gl.getUniformLocation(program, 'uSpectralScale');
     const uSpectralTimeShiftLocation = gl.getUniformLocation(program, 'uSpectralTimeShift');
     const uSpectralSaturationLocation = gl.getUniformLocation(program, 'uSpectralSaturation');
+    const uVerticalScrollOffsetLocation = gl.getUniformLocation(program, 'uVerticalScrollOffset');
     const uColor1Location = gl.getUniformLocation(program, 'uColor1');
     const uColor2Location = gl.getUniformLocation(program, 'uColor2');
     const uColor3Location = gl.getUniformLocation(program, 'uColor3');
@@ -342,10 +349,15 @@ export default function ShaderGradient({
       gl.uniform2f(iMouseLocation, mousePosRef.current.x, canvas.height - mousePosRef.current.y);
       gl.uniform2f(iSmoothedMouseLocation, smoothMousePosRef.current.x, canvas.height - smoothMousePosRef.current.y);
       gl.uniform1f(uAnimationSpeedLocation, settings.animationSpeed);
-      gl.uniform1f(uGrainIntensityLocation, settings.grainIntensity);
+      const isMobileViewport = canvas.width < 768;
+      const effectiveGrainIntensity = isMobileViewport ? settings.grainIntensity * 0.45 : settings.grainIntensity;
+      const verticalScrollOffset = scrollProgressRef.current * 8;
+
+      gl.uniform1f(uGrainIntensityLocation, effectiveGrainIntensity);
       gl.uniform1f(uCircleRadiusLocation, settings.circleRadius);
       gl.uniform1f(uRippleIntensityLocation, settings.rippleIntensity);
       gl.uniform1i(uColorModeLocation, settings.colorMode === 'spectral' ? 0 : 1);
+      gl.uniform1f(uVerticalScrollOffsetLocation, verticalScrollOffset);
 
       // In spectral mode, derive palette from scroll color.
       // In custom mode, always use the user-selected settings colors.

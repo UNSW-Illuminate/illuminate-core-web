@@ -19,6 +19,14 @@ This is a Next.js project that renders a full-screen animated WebGL shader gradi
 
 ## Development Guidelines
 
+## Design Rules
+
+- Do not use borders as a visual treatment.
+- Do not use uppercase styling for interface copy.
+- Do not change letter spacing or tracking from the base type style.
+- Use a subtle animated underline for text-link hover states instead of border-based link treatments.
+- Reuse shared ui components for repeated patterns before introducing one-off markup.
+
 ### Running the Project
 
 ```bash

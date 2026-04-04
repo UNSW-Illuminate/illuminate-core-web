@@ -10,7 +10,7 @@ export default function Home() {
           <CenterTitle />
         </section>
 
-        <section className="min-h-screen flex items-center justify-center px-6">
+        <section id="projects" className="min-h-screen flex items-center justify-center px-6 scroll-mt-24">
           <h2 className="text-center text-5xl md:text-7xl font-light tracking-tight text-white/95">
             Showcase
           </h2>
@@ -22,13 +22,13 @@ export default function Home() {
           </h2>
         </section>
 
-        <section className="min-h-screen flex items-center justify-center px-6">
+        <section id="team" className="min-h-screen flex items-center justify-center px-6 scroll-mt-24">
           <h2 className="text-center text-5xl md:text-7xl font-light tracking-tight text-white/95">
             Meet The Team
           </h2>
         </section>
 
-        <section className="min-h-screen flex items-center justify-center px-6">
+        <section id="contact" className="min-h-screen flex items-center justify-center px-6 scroll-mt-24">
           <h2 className="text-center text-5xl md:text-7xl font-light tracking-tight text-white/95">
             Contact
           </h2>

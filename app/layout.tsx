@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 import SmoothCursor from './components/SmoothCursor';
 import { SmoothScrollProvider } from './components/SmoothScrollProvider';
+import Footer from './components/Footer';
 
 export const metadata: Metadata = {
   title: 'UNSW Illuminate',
@@ -38,6 +39,7 @@ export default function RootLayout({
         <SmoothScrollProvider>
           <SmoothCursor />
           {children}
+          <Footer />
         </SmoothScrollProvider>
       </body>
     </html>
