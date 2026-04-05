@@ -85,7 +85,7 @@ export default function Footer() {
                   ariaLabel={social.name}
                   title={social.name}
                   variant="arrow"
-                    size="regular"
+                    size="small"
                     iconClassName="h-12 w-12"
                   arrowClassName="bg-white/[0.06]"
                   icon={

@@ -94,27 +94,9 @@ function buildProjectImages(slug: string, title: string) {
 /**
  * Teaser entries shown in "Discover More" lists for projects that don't yet
  * have a full project page. They appear after the real linked projects.
- * Add a teaser here to keep a slot visible while work is in progress;
  * once the project is added to projectPageSeeds below it will appear
  * there automatically and can be removed from this list.
  */
-const teaserProjects: ProjectDiscoverItem[] = [
-  {
-    title: 'Pancake',
-    type: 'Interactive Build',
-    shortDescription: 'A playful hands-on build that explores interaction design through physical prototypes.',
-  },
-  {
-    title: 'Dithering Effect',
-    type: 'Visualisation',
-    shortDescription: 'A visual experiment that blends digital texture and motion into a responsive display.',
-  },
-  {
-    title: '2025 Showcase',
-    type: 'Exhibition',
-    shortDescription: 'A curated collection of CREATE projects presented as immersive engineering experiences.',
-  },
-];
 
 // ---------------------------------------------------------------------------
 // HOW TO ADD A PROJECT
@@ -139,7 +121,6 @@ const teaserProjects: ProjectDiscoverItem[] = [
 //
 // 6. If you want the project to appear in "Discover More" on other project
 //    pages, it will do so automatically once it is in this array.
-//    Remove any matching teaser entry from teaserProjects above.
 // ---------------------------------------------------------------------------
 const projectPageSeeds: ProjectPageSeed[] = [
   {
@@ -256,6 +237,25 @@ export function getProjectBySlug(slug: string) {
   return projectPages.find((project) => project.slug === slug);
 }
 
+export function getAdjacentProjects(currentSlug: string) {
+  const currentIndex = projectPages.findIndex((project) => project.slug === currentSlug);
+
+  if (currentIndex === -1 || projectPages.length <= 1) {
+    return {
+      previousProject: null,
+      nextProject: null,
+    };
+  }
+
+  const previousProject = projectPages[(currentIndex - 1 + projectPages.length) % projectPages.length];
+  const nextProject = projectPages[(currentIndex + 1) % projectPages.length];
+
+  return {
+    previousProject,
+    nextProject,
+  };
+}
+
 export function getDiscoverMoreProjects(currentSlug: string): ProjectDiscoverItem[] {
   const linkedProjects = projectPages
     .filter((project) => project.slug !== currentSlug)
@@ -266,5 +266,5 @@ export function getDiscoverMoreProjects(currentSlug: string): ProjectDiscoverIte
       href: `/${project.slug}`,
     }));
 
-  return [...linkedProjects, ...teaserProjects];
+  return [...linkedProjects];
 }

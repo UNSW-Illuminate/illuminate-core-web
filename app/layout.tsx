@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import './globals.css';
-import SmoothCursor from './components/SmoothCursor';
+import CustomCursor from './components/CustomCursor';
 import { SmoothScrollProvider } from './components/SmoothScrollProvider';
 import Footer from './components/Footer';
 
@@ -37,7 +37,7 @@ export default function RootLayout({
     <html lang="en">
       <body className="m-0 p-0 overflow-x-hidden">
         <SmoothScrollProvider>
-          <SmoothCursor />
+          <CustomCursor />
           {children}
           <Footer />
         </SmoothScrollProvider>

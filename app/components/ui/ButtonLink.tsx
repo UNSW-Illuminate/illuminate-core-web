@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { type ReactNode, useState } from 'react';
+import { type MouseEventHandler, type ReactNode, useState } from 'react';
 
 type ButtonLinkProps = {
   href: string;
@@ -11,6 +11,7 @@ type ButtonLinkProps = {
   className?: string;
   iconClassName?: string;
   arrowClassName?: string;
+  arrowIconClassName?: string;
   size?: 'small' | 'regular' | 'large' | 'extraLarge';
   target?: string;
   rel?: string;
@@ -18,6 +19,8 @@ type ButtonLinkProps = {
   ariaLabel?: string;
   variant?: 'default' | 'arrow';
   icon?: ReactNode;
+  arrowPlacement?: 'left' | 'right';
+  onClick?: MouseEventHandler<HTMLAnchorElement>;
 };
 
 function joinClasses(...values: Array<string | undefined>) {
@@ -57,6 +60,7 @@ export default function ButtonLink({
   className,
   iconClassName,
   arrowClassName,
+  arrowIconClassName,
   size = 'regular',
   target,
   rel,
@@ -64,28 +68,33 @@ export default function ButtonLink({
   ariaLabel,
   variant = 'default',
   icon,
+  arrowPlacement = 'right',
+  onClick,
 }: ButtonLinkProps) {
   const [isHovered, setIsHovered] = useState(false);
   const sizing = sizeStyles[size];
 
+  const arrowElement = variant === 'arrow' ? (
+    <span className={joinClasses(arrowPlacement === 'left' ? 'mr-4' : 'ml-4', 'flex shrink-0 items-center justify-center rounded-full bg-white/[0.08]', sizing.arrow, arrowClassName)}>
+      <motion.span
+        initial={false}
+        animate={{ x: isHovered ? (arrowPlacement === 'left' ? -4 : 4) : 0 }}
+        transition={{ type: 'spring', stiffness: 260, damping: 28, mass: 0.7 }}
+        className="flex items-center justify-center"
+      >
+        <Image src="/icons/arrow-right.svg" alt="" width={18} height={18} aria-hidden="true" className={joinClasses('h-[18px] w-[18px] brightness-0 invert', arrowIconClassName)} />
+      </motion.span>
+    </span>
+  ) : null;
+
   const content = (
     <>
+      {arrowPlacement === 'left' ? arrowElement : null}
       <span className={joinClasses('flex min-w-0 items-center', sizing.gap)}>
         {icon ? <span className={joinClasses('flex shrink-0 items-center justify-center text-white', sizing.icon, iconClassName)}>{icon}</span> : null}
         <span className="min-w-0 text-left">{children}</span>
       </span>
-      {variant === 'arrow' ? (
-        <span className={joinClasses('ml-4 flex shrink-0 items-center justify-center rounded-full bg-white/[0.08]', sizing.arrow, arrowClassName)}>
-          <motion.span
-            initial={false}
-            animate={{ x: isHovered ? 4 : 0 }}
-            transition={{ type: 'spring', stiffness: 260, damping: 28, mass: 0.7 }}
-            className="flex items-center justify-center"
-          >
-            <Image src="/icons/arrow-right.svg" alt="" width={18} height={18} aria-hidden="true" className="h-[18px] w-[18px] brightness-0 invert" />
-          </motion.span>
-        </span>
-      ) : null}
+      {arrowPlacement === 'right' ? arrowElement : null}
     </>
   );
 
@@ -111,6 +120,7 @@ export default function ButtonLink({
         title={title}
         aria-label={ariaLabel}
         className={sharedClassName}
+        onClick={onClick}
         {...interactionProps}
       >
         {content}
@@ -119,7 +129,7 @@ export default function ButtonLink({
   }
 
   return (
-    <Link href={href} title={title} aria-label={ariaLabel} className={sharedClassName} {...interactionProps}>
+    <Link href={href} title={title} aria-label={ariaLabel} className={sharedClassName} onClick={onClick} {...interactionProps}>
       {content}
     </Link>
   );

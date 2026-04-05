@@ -9,7 +9,7 @@ export function SmoothScrollProvider({ children }: { children: React.ReactNode }
   useEffect(() => {
     // Create Lenis instance for smooth scrolling
     const lenis = new Lenis({
-      duration: 1.2, // Scroll duration in seconds
+      duration: 0.75, // Lower duration = less smoothing, closer to native scroll
       easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)), // easeOutExpo
       direction: 'vertical',
       gestureDirection: 'vertical',
@@ -20,15 +20,23 @@ export function SmoothScrollProvider({ children }: { children: React.ReactNode }
 
     lenisRef.current = lenis;
 
+    const handleScrollToTop = () => {
+      lenis.scrollTo(0, {
+        duration: 1,
+      });
+    };
+
     // Animation loop for Lenis
     function raf(time: number) {
       lenis.raf(time);
       requestAnimationFrame(raf);
     }
 
+    window.addEventListener('lenis-scroll-top', handleScrollToTop);
     requestAnimationFrame(raf);
 
     return () => {
+      window.removeEventListener('lenis-scroll-top', handleScrollToTop);
       lenis.destroy();
     };
   }, []);
