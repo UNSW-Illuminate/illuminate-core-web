@@ -42,8 +42,9 @@ Key app files:
 - `app/components/InteractiveGradient.tsx` - connects scroll color + settings into shader
 - `app/components/ProjectPageLayout.tsx` - reusable project detail layout
 - `app/projects/[projectSlug]/page.tsx` - dynamic project route (`/projects/synergy`, `/projects/resonance`)
-- `app/admin/page.tsx` - password-gated dark admin UI to create/edit/remove projects
+- `app/admin/` - password-gated dark dashboard (Projects + Team) with image previews and a live project-page preview
 - `app/projects-data.ts` - single source of truth for project content
+- `app/team-data.ts` - committed seed for the team roster (managed in /admin)
 
 ## Shader Notes
 
@@ -101,6 +102,25 @@ Numbered files:
 - etc.
 
 The first image (`01.webp`) is used as the hero image and all numbered images are used by the gallery.
+
+## Admin Dashboard
+
+A password-gated dark dashboard lives at `/admin` (login `admin` / `admin` for now —
+swap the hardcoded creds in `app/admin/auth-constants.ts` for env vars before any
+real deployment). Auth is a cookie session via `middleware.ts`.
+
+It has two sections:
+
+- **Projects** — image-thumbnail cards for every project. Editing opens a two-pane
+  view: a form on the left and a **live preview** of the `/projects/[slug]` page on
+  the right that updates as you type. Project images are previewed from
+  `public/projectImages/{slug}/` (read-only here).
+- **Team** — manage team members and **upload their photos** (stored as data URLs).
+  Seeded from `app/team-data.ts`.
+
+Persistence is **localStorage-only** (per-browser; it doesn't change what visitors
+see). Use **Copy JSON** to export project edits into `app/projects-data.ts`. Moving
+this to a server file or database is the next step when edits need to go live.
 
 ## Global Styles
 
