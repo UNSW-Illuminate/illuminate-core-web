@@ -56,6 +56,24 @@ Current shader behavior includes:
 
 Settings are managed via `app/hooks/useShaderSettings.ts`.
 
+### Shader Editor
+
+A live editor for tuning the gradient ships with the front page but stays hidden for
+normal visitors. Open it with:
+
+- **`Cmd/Ctrl + .`** to toggle, or
+- visiting the page with **`?editor`** in the URL (e.g. `/?editor`).
+
+The editor (`app/components/ShaderEditor.tsx`) exposes grouped sliders with precise
+numeric inputs (animation, cursor, texture, and spectral controls), colour-mode and
+custom-colour pickers, and per-control reset. **Changes auto-save to `localStorage`**
+on every edit (debounced) under the `illuminate-settings` key, so tuned values persist
+and become the page's defaults. Use **Copy JSON** / **Import** to move a configuration
+between machines, **Reset all** to return to `DEFAULT_SETTINGS`, and `Esc` to close.
+
+To make the editor always visible (e.g. a permanent toggle), render it unconditionally
+instead of gating on the shortcut/URL in `ShaderEditor.tsx`.
+
 ## Project Pages System
 
 Project pages are data-driven.
