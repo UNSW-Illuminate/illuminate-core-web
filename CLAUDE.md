@@ -20,7 +20,8 @@ Interactive website for UNSW Illuminate: a full-screen WebGL shader background, 
 
 - `app/page.tsx` — landing page sections
 - `app/layout.tsx` — root layout + metadata
-- `app/[projectSlug]/page.tsx` — dynamic project route (`generateStaticParams`)
+- `app/projects/[projectSlug]/page.tsx` — dynamic project route (`generateStaticParams`)
+- `app/admin/` — password-gated dark admin UI for project CRUD
 - `app/projects-data.ts` — single source of truth for project content
 - `app/components/` — feature components; `app/components/ui/` — reusable primitives
 - `app/hooks/` — shared hooks (`useShaderSettings`, `useScrollColor`)
@@ -93,7 +94,7 @@ switch (mode.kind) {
 Project pages are data-driven — see the README for the full convention. In short:
 
 - Add new projects to `projectPageSeeds` in `app/projects-data.ts`; never hardcode content in route files.
-- Each project needs a unique `slug` (becomes `/your-slug`) and an `imageCount` matching the numbered media.
+- Each project needs a unique `slug` (becomes `/projects/your-slug`) and an `imageCount` matching the numbered media.
 - Media lives in `public/projectImages/{slug}/` as `01.webp`, `02.webp`, … (`01.webp` is the hero).
 - Preserve slugs and image-naming conventions to avoid broken links.
 

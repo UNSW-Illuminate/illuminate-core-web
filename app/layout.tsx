@@ -1,8 +1,5 @@
 import type { Metadata } from 'next';
 import './globals.css';
-import CustomCursor from './components/CustomCursor';
-import { SmoothScrollProvider } from './components/SmoothScrollProvider';
-import Footer from './components/Footer';
 
 export const metadata: Metadata = {
   title: 'UNSW Illuminate',
@@ -35,13 +32,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="m-0 p-0 overflow-x-hidden">
-        <SmoothScrollProvider>
-          <CustomCursor />
-          {children}
-          <Footer />
-        </SmoothScrollProvider>
-      </body>
+      <body className="m-0 p-0 overflow-x-hidden">{children}</body>
     </html>
   );
 }

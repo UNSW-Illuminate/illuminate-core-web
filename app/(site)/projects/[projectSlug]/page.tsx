@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
-import ProjectPageLayout from '../components/ProjectPageLayout';
-import { getAdjacentProjects, getDiscoverMoreProjects, getProjectBySlug, projectPages } from '../projects-data';
+import ProjectPageLayout from '@/app/components/ProjectPageLayout';
+import { getAdjacentProjects, getDiscoverMoreProjects, getProjectBySlug, projectPages } from '@/app/projects-data';
 
 type ProjectPageProps = {
   params: Promise<{
@@ -35,8 +35,8 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
       description={project.description}
       heroImage={project.heroImage}
       galleryImages={project.galleryImages}
-      previousProject={previousProject ? { title: previousProject.title, href: `/${previousProject.slug}` } : undefined}
-      nextProject={nextProject ? { title: nextProject.title, href: `/${nextProject.slug}` } : undefined}
+      previousProject={previousProject ? { title: previousProject.title, href: `/projects/${previousProject.slug}` } : undefined}
+      nextProject={nextProject ? { title: nextProject.title, href: `/projects/${nextProject.slug}` } : undefined}
       discoverMoreProjects={getDiscoverMoreProjects(project.slug)}
     />
   );

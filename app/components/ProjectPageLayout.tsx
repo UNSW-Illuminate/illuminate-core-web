@@ -93,7 +93,7 @@ export default function ProjectPageLayout({
           </Link>
 
           <div className="flex flex-wrap items-center justify-end gap-3">
-            {previousProject && previousProject.href !== `/${currentSlug}` ? (
+            {previousProject && previousProject.href !== `/projects/${currentSlug}` ? (
               <div className="w-full sm:w-auto sm:min-w-[168px]">
                 <ButtonLink
                   href={previousProject.href}
@@ -111,7 +111,7 @@ export default function ProjectPageLayout({
               </div>
             ) : null}
 
-            {nextProject && nextProject.href !== `/${currentSlug}` ? (
+            {nextProject && nextProject.href !== `/projects/${currentSlug}` ? (
               <div className="w-full sm:w-auto sm:min-w-[152px]">
                 <ButtonLink
                   href={nextProject.href}

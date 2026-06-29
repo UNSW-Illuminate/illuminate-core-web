@@ -1,5 +1,5 @@
-import InteractiveGradient from './components/InteractiveGradient';
-import CenterTitle from './components/CenterTitle';
+import InteractiveGradient from '@/app/components/InteractiveGradient';
+import CenterTitle from '@/app/components/CenterTitle';
 
 export default function Home() {
   return (

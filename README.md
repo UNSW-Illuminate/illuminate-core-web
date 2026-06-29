@@ -41,7 +41,8 @@ Key app files:
 - `app/components/ShaderGradient.tsx` - WebGL shader canvas renderer
 - `app/components/InteractiveGradient.tsx` - connects scroll color + settings into shader
 - `app/components/ProjectPageLayout.tsx` - reusable project detail layout
-- `app/[projectSlug]/page.tsx` - dynamic top-level project route (`/synergy`, `/another-project`)
+- `app/projects/[projectSlug]/page.tsx` - dynamic project route (`/projects/synergy`, `/projects/resonance`)
+- `app/admin/page.tsx` - password-gated dark admin UI to create/edit/remove projects
 - `app/projects-data.ts` - single source of truth for project content
 
 ## Shader Notes
@@ -79,11 +80,11 @@ instead of gating on the shortcut/URL in `ShaderEditor.tsx`.
 Project pages are data-driven.
 
 1. Add a new project object to `projectPageSeeds` in `app/projects-data.ts`.
-2. Give it a unique `slug` (this becomes route path `/your-slug`).
+2. Give it a unique `slug` (this becomes route path `/projects/your-slug`).
 3. Provide copy fields (title, short description, description, etc).
 4. Set `imageCount` to match available numbered images.
 
-The route is generated automatically through `app/[projectSlug]/page.tsx` and `generateStaticParams`.
+The route is generated automatically through `app/projects/[projectSlug]/page.tsx` and `generateStaticParams`.
 
 ### Image Convention
 

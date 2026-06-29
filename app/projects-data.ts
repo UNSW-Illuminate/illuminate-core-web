@@ -36,7 +36,7 @@ type ProjectDiscoverItem = {
 };
 
 export type ProjectPageData = {
-  /** URL segment, e.g. 'synergy' → /synergy. Must match the image folder name. */
+  /** URL segment, e.g. 'synergy' → /projects/synergy. Must match the image folder name. */
   slug: string;
   title: string;
   projectType: string;
@@ -51,7 +51,7 @@ export type ProjectPageData = {
   galleryImages: ProjectImage[];
 };
 
-type ProjectPageSeed = Omit<ProjectPageData, 'heroImage' | 'galleryImages'>;
+export type ProjectPageSeed = Omit<ProjectPageData, 'heroImage' | 'galleryImages'>;
 
 /**
  * Derives heroImage and galleryImages from existing files in /public.
@@ -105,7 +105,7 @@ function buildProjectImages(slug: string, title: string) {
 //    the array (or wherever chronologically appropriate).
 //
 // 2. Set a unique `slug` (lowercase, hyphen-separated). This becomes the URL:
-//    /[slug]
+//    /projects/[slug]
 //
 // 3. Place images in:
 //    public/projectImages/[slug]/01.webp  (hero — shown first)
@@ -116,8 +116,8 @@ function buildProjectImages(slug: string, title: string) {
 // 4. Fill in title, projectType, shortDescription, location, dates, and
 //    description. Use \n\n in description for paragraph breaks.
 //
-// 5. The project page is automatically available at /[slug] via the
-//    [projectSlug] dynamic route — no routing changes needed.
+// 5. The project page is automatically available at /projects/[slug] via the
+//    projects/[projectSlug] dynamic route — no routing changes needed.
 //
 // 6. If you want the project to appear in "Discover More" on other project
 //    pages, it will do so automatically once it is in this array.
@@ -228,6 +228,12 @@ const projectPageSeeds: ProjectPageSeed[] = [
   },
 ];
 
+/**
+ * Editable project fields (no derived images), exposed for the /admin tool to
+ * hydrate from the committed source of truth.
+ */
+export const projectSeeds: ProjectPageSeed[] = projectPageSeeds;
+
 export const projectPages: ProjectPageData[] = projectPageSeeds.map((project) => ({
   ...project,
   ...buildProjectImages(project.slug, project.title),
@@ -263,7 +269,7 @@ export function getDiscoverMoreProjects(currentSlug: string): ProjectDiscoverIte
       title: project.title,
       type: project.projectType,
       shortDescription: project.shortDescription,
-      href: `/${project.slug}`,
+      href: `/projects/${project.slug}`,
     }));
 
   return [...linkedProjects];

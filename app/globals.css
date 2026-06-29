@@ -48,4 +48,23 @@ body {
   canvas {
     cursor: none;
   }
+
+  /* The admin tool opts out of the marketing custom-cursor behaviour. */
+  .admin-root,
+  .admin-root * {
+    cursor: auto;
+  }
+
+  .admin-root button,
+  .admin-root a,
+  .admin-root select,
+  .admin-root input[type='range'],
+  .admin-root input[type='color'] {
+    cursor: pointer;
+  }
+
+  .admin-root input,
+  .admin-root textarea {
+    cursor: text;
+  }
 }
