@@ -87,7 +87,7 @@ The first image (`01.webp`) is used as the hero image and all numbered images ar
 
 `app/globals.css` includes:
 
-- brand color variable (`#ff1643`)
+- brand colour variable (`--brand-color`, `#FF34B1`)
 - text selection highlight styling
 - black base background
 - desktop-only custom cursor behavior
@@ -97,3 +97,4 @@ The first image (`01.webp`) is used as the hero image and all numbered images ar
 - Reuse existing components before introducing one-off markup.
 - Keep project content inside `app/projects-data.ts` (not hardcoded in route files).
 - Preserve route slugs and image naming conventions to avoid broken links.
+- See [CLAUDE.md](CLAUDE.md) for the full coding conventions and design-system rules.

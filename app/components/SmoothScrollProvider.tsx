@@ -11,10 +11,10 @@ export function SmoothScrollProvider({ children }: { children: React.ReactNode }
     const lenis = new Lenis({
       duration: 0.75, // Lower duration = less smoothing, closer to native scroll
       easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)), // easeOutExpo
-      direction: 'vertical',
-      gestureDirection: 'vertical',
+      orientation: 'vertical',
+      gestureOrientation: 'vertical',
       smoothWheel: true,
-      smoothTouch: false,
+      syncTouch: false,
       touchMultiplier: 2,
     });
 
