@@ -142,7 +142,7 @@ export default function TeamSection({ seed }: { seed: TeamMember[] }) {
 
       {draft && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4" onClick={() => setDraft(null)}>
-          <div className="w-full max-w-md rounded-2xl bg-[#0c0c0c] p-6" onClick={(e) => e.stopPropagation()}>
+          <div className="w-full max-w-md rounded-2xl bg-neutral-900 p-6" onClick={(e) => e.stopPropagation()}>
             <h2 className="mb-5 text-lg font-medium">{isNew ? 'Add member' : 'Edit member'}</h2>
 
             <div className="mb-5 flex items-center gap-4">

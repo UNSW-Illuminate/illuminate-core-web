@@ -162,7 +162,7 @@ export default function ShaderEditor({
           <label className="mb-2 block text-xs text-white/40">Colour mode</label>
           <select
             value={settings.colorMode}
-            onChange={(e) => onUpdateSetting('colorMode', e.target.value as ShaderSettings['colorMode'])}
+            onChange={(e) => onUpdateSetting('colorMode', e.target.value === 'custom' ? 'custom' : 'spectral')}
             aria-label="Colour mode"
             className="w-full rounded border border-white/15 bg-white/5 px-2 py-1.5 text-sm text-white focus:border-white/40 focus:outline-none"
           >

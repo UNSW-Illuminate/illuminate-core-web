@@ -470,8 +470,9 @@ export default function ShaderGradient({
           aria-hidden="true"
           className="fixed inset-0 -z-10 pointer-events-none"
           style={{
+            // Brand-tinted glow over the black page background (no hardcoded hex).
             background:
-              'radial-gradient(circle at 30% 20%, var(--brand-color), transparent 55%), radial-gradient(circle at 75% 75%, #2a0030, #000)',
+              'radial-gradient(circle at 30% 20%, var(--brand-color), transparent 55%), radial-gradient(circle at 75% 75%, color-mix(in srgb, var(--brand-color) 35%, black), transparent 60%)',
           }}
         />
       )}

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 
-export interface ShaderSettings {
+export type ShaderSettings = {
   animationSpeed: number;
   grainIntensity: number;
   circleRadius: number;
@@ -16,7 +16,7 @@ export interface ShaderSettings {
   customColor1: string;
   customColor2: string;
   customColor3: string;
-}
+};
 
 export const DEFAULT_SETTINGS: ShaderSettings = {
   animationSpeed: 1.0,
@@ -36,22 +36,35 @@ export const DEFAULT_SETTINGS: ShaderSettings = {
 
 const STORAGE_KEY = 'illuminate-settings';
 
-// Coerce an untrusted object (parsed JSON / localStorage) into valid settings by
-// keeping only known keys whose type matches the default, merged over the defaults.
+// Narrowing guard for inspecting untrusted input without an `as` cast.
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null;
+
+const numberOr = (value: unknown, fallback: number) =>
+  typeof value === 'number' && Number.isFinite(value) ? value : fallback;
+
+const stringOr = (value: unknown, fallback: string) =>
+  typeof value === 'string' ? value : fallback;
+
+// Build valid settings from untrusted input (parsed JSON / localStorage), reading
+// each known field with a type guard and filling any gaps from the defaults.
 const coerceSettings = (value: unknown): ShaderSettings => {
-  const next: ShaderSettings = { ...DEFAULT_SETTINGS };
-  if (value === null || typeof value !== 'object') return next;
-  const source = value as Record<string, unknown>;
-  for (const key of Object.keys(DEFAULT_SETTINGS) as Array<keyof ShaderSettings>) {
-    const candidate = source[key];
-    if (key === 'colorMode') {
-      if (candidate === 'spectral' || candidate === 'custom') next.colorMode = candidate;
-    } else if (typeof candidate === typeof DEFAULT_SETTINGS[key]) {
-      // numbers and colour strings carry through once the primitive type matches
-      (next[key] as ShaderSettings[typeof key]) = candidate as ShaderSettings[typeof key];
-    }
-  }
-  return next;
+  if (!isRecord(value)) return { ...DEFAULT_SETTINGS };
+  return {
+    animationSpeed: numberOr(value.animationSpeed, DEFAULT_SETTINGS.animationSpeed),
+    grainIntensity: numberOr(value.grainIntensity, DEFAULT_SETTINGS.grainIntensity),
+    circleRadius: numberOr(value.circleRadius, DEFAULT_SETTINGS.circleRadius),
+    trailDrag: numberOr(value.trailDrag, DEFAULT_SETTINGS.trailDrag),
+    rippleIntensity: numberOr(value.rippleIntensity, DEFAULT_SETTINGS.rippleIntensity),
+    colorMode: value.colorMode === 'custom' ? 'custom' : 'spectral',
+    spectralHueShift: numberOr(value.spectralHueShift, DEFAULT_SETTINGS.spectralHueShift),
+    spectralScale: numberOr(value.spectralScale, DEFAULT_SETTINGS.spectralScale),
+    spectralTimeShift: numberOr(value.spectralTimeShift, DEFAULT_SETTINGS.spectralTimeShift),
+    spectralSaturation: numberOr(value.spectralSaturation, DEFAULT_SETTINGS.spectralSaturation),
+    customColor1: stringOr(value.customColor1, DEFAULT_SETTINGS.customColor1),
+    customColor2: stringOr(value.customColor2, DEFAULT_SETTINGS.customColor2),
+    customColor3: stringOr(value.customColor3, DEFAULT_SETTINGS.customColor3),
+  };
 };
 
 export type SaveStatus = 'idle' | 'saved';

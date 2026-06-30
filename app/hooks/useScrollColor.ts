@@ -1,19 +1,19 @@
 import { useEffect, useState, useRef } from 'react';
 
-export interface SectionColor {
+export type SectionColor = {
   hue: number;
   saturation: number;
   lightness: number;
-}
+};
 
-interface ScrollFrame {
+type ScrollFrame = {
   id: string;
   start: number; // normalized 0..1
   end: number; // normalized 0..1
   from: SectionColor;
   to: SectionColor;
   name: string;
-}
+};
 
 // Frame-based color progression across the page.
 // Each frame clamps hue to a bounded range and interpolates within that range.

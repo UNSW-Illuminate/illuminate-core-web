@@ -135,7 +135,7 @@ const projectPageSeeds: ProjectPageSeed[] = [
     title: 'Synergy',
     projectType: 'Installation',
     shortDescription:
-      'An interactive nature-inspired installation demonstrating superorganism behavior through light-reactive ferns and audience movement.',
+      'An interactive nature-inspired installation demonstrating superorganism behaviour through light-reactive ferns and audience movement.',
     location: 'Vivid Sydney',
     dates: '2025',
     description:

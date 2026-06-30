@@ -19,6 +19,9 @@ export function useLocalCollection<T>(storageKey: string, seed: T[]) {
     if (stored) {
       try {
         const parsed: unknown = JSON.parse(stored);
+        // Trust boundary: localStorage holds whatever was last written for this key.
+        // We verify it's an array; the element cast is unavoidable for a generic
+        // rehydration helper (the alternative, JSON.parse's implicit `any`, is worse).
         if (Array.isArray(parsed)) setItems(parsed as T[]);
       } catch {
         /* keep the seed on malformed storage */
