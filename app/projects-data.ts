@@ -69,16 +69,23 @@ function buildProjectImages(slug: string, title: string) {
   const directory = path.join(process.cwd(), 'public', 'projectImages', slug);
   const imageFilePattern = /^(\d+)\.(webp|jpg|jpeg|png|avif)$/i;
 
-  const imageFilenames = fs.existsSync(directory)
-    ? fs
+  // Reading the folder can fail (missing directory, permissions); treat any
+  // failure as "no images" so a single bad folder never breaks the build.
+  let imageFilenames: string[] = [];
+  try {
+    if (fs.existsSync(directory)) {
+      imageFilenames = fs
         .readdirSync(directory)
         .filter((filename) => imageFilePattern.test(filename))
         .sort((a, b) => {
           const aNumber = Number(a.match(imageFilePattern)?.[1] ?? 0);
           const bNumber = Number(b.match(imageFilePattern)?.[1] ?? 0);
           return aNumber - bNumber;
-        })
-    : [];
+        });
+    }
+  } catch (e) {
+    console.error(`Could not read images for project "${slug}":`, e);
+  }
 
   const galleryImages = imageFilenames.map((filename, index) => ({
     src: `/projectImages/${slug}/${filename}`,

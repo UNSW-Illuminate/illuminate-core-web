@@ -80,8 +80,13 @@ export const useShaderSettings = () => {
   useEffect(() => {
     if (!hydrated.current) return;
     const timeout = setTimeout(() => {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
-      setSaveStatus('saved');
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
+        setSaveStatus('saved');
+      } catch (e) {
+        // e.g. private-browsing storage limits — keep the in-memory settings.
+        console.error('Could not persist shader settings:', e);
+      }
     }, 250);
     return () => clearTimeout(timeout);
   }, [settings]);

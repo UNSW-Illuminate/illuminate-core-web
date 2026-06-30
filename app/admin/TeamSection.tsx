@@ -49,7 +49,11 @@ export default function TeamSection({ seed }: { seed: TeamMember[] }) {
       return;
     }
     const reader = new FileReader();
-    reader.onload = () => setDraft((prev) => (prev ? { ...prev, photo: String(reader.result) } : prev));
+    reader.onload = () => {
+      setError(null);
+      setDraft((prev) => (prev ? { ...prev, photo: String(reader.result) } : prev));
+    };
+    reader.onerror = () => setError('Could not read that image. Try a different file.');
     reader.readAsDataURL(file);
   };
 

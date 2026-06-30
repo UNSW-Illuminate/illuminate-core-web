@@ -1,139 +1,109 @@
 # Illuminate
 
-Interactive website for UNSW Illuminate featuring a full-screen WebGL shader background, smooth cursor system, and reusable data-driven project pages.
+The website for **UNSW Illuminate** — a student showcase of interactive light and
+art installations. The landing page renders a full-screen WebGL gradient that reacts
+to the cursor and scroll position; individual installations live on data-driven
+project pages; and a password-gated `/admin` dashboard manages the content.
 
-## Tech Stack
+## Tech stack
 
-- Next.js 15 (App Router)
-- React 19 + TypeScript
-- Tailwind CSS
-- WebGL 2.0 shader pipeline
-- Lenis smooth scrolling
+- **Next.js 15** (App Router) + **React 19**
+- **TypeScript** (strict)
+- **Tailwind CSS** + CSS custom properties for theming
+- **WebGL 2.0** for the shader gradient (with a static CSS fallback)
+- **framer-motion** (animation) and **lenis** (smooth scrolling)
 
-## Getting Started
-
-Install dependencies:
-
-```bash
-npm install
-```
-
-Run development server:
+## Getting started
 
 ```bash
-npm run dev
+npm install      # install dependencies (this repo uses npm)
+npm run dev      # start the dev server on http://localhost:3000
+npm run build    # production build
+npm start        # serve the production build
+npm run lint     # eslint (next/core-web-vitals)
 ```
 
-Open http://localhost:3000
+## Project structure
 
-Production:
-
-```bash
-npm run build
-npm start
+```
+app/
+  (site)/                     # public marketing site (custom cursor, footer, smooth scroll)
+    page.tsx                  # landing page sections
+    projects/[projectSlug]/   # /projects/<slug> — generated from projects-data.ts
+  admin/                      # password-gated dashboard (own layout, no marketing chrome)
+  api/admin/                  # login / logout route handlers (cookie session)
+  components/                 # shared components incl. ShaderGradient, ProjectPageLayout
+  hooks/                      # useShaderSettings, useScrollColor
+  projects-data.ts            # single source of truth for project content
+  team-data.ts                # committed seed for the team roster
+middleware.ts                 # gates everything under /admin
 ```
 
-## Project Structure
+Routing note: project pages live under `/projects/<slug>`. The public site sits in a
+`(site)` route group so `/admin` can opt out of the global cursor, footer, and
+smooth-scroll chrome.
 
-Key app files:
+## The shader background
 
-- `app/page.tsx` - landing page sections
-- `app/components/ShaderGradient.tsx` - WebGL shader canvas renderer
-- `app/components/InteractiveGradient.tsx` - connects scroll color + settings into shader
-- `app/components/ProjectPageLayout.tsx` - reusable project detail layout
-- `app/projects/[projectSlug]/page.tsx` - dynamic project route (`/projects/synergy`, `/projects/resonance`)
-- `app/admin/` - password-gated dark dashboard (Projects + Team) with image previews and a live project-page preview
-- `app/projects-data.ts` - single source of truth for project content
-- `app/team-data.ts` - committed seed for the team roster (managed in /admin)
+`app/components/ShaderGradient.tsx` paints a full-screen WebGL 2 gradient behind the
+whole site. It supports spectral and custom colour modes, grain/ripple effects, a
+cursor trail, and scroll-linked vertical movement (with reduced grain on mobile).
+Runtime values come from `app/hooks/useShaderSettings.ts` (`DEFAULT_SETTINGS`),
+persisted to `localStorage` under `illuminate-settings`.
 
-## Shader Notes
+If WebGL 2 is unavailable or the program fails to compile, the component falls back to
+a static CSS gradient so the page is never blank.
 
-Current shader behavior includes:
+### Shader editor
 
-- spectral/custom color modes
-- grain/noise and ripple controls
-- mouse trail distortion
-- scroll-linked vertical gradient movement
-- reduced noise intensity on mobile viewports
+A live tuning panel ships with the landing page but stays hidden for normal visitors.
+Open it with **`Cmd/Ctrl + .`** or by visiting **`/?editor`**; close with `Esc`.
 
-Settings are managed via `app/hooks/useShaderSettings.ts`.
+It offers grouped sliders with precise numeric inputs (animation, cursor, texture,
+spectral), colour-mode and custom-colour pickers, and per-control reset. Edits
+**auto-save** to `localStorage` (debounced), so tuned values become the page defaults.
+Use **Copy JSON** / **Import** to move a configuration between machines, or **Reset
+all** to return to defaults. To make the panel always visible, render `ShaderEditor`
+unconditionally instead of gating on the shortcut/URL.
 
-### Shader Editor
+## Project pages
 
-A live editor for tuning the gradient ships with the front page but stays hidden for
-normal visitors. Open it with:
+Project pages are data-driven from `projectPageSeeds` in `app/projects-data.ts`.
 
-- **`Cmd/Ctrl + .`** to toggle, or
-- visiting the page with **`?editor`** in the URL (e.g. `/?editor`).
+1. Add a project object with a unique `slug` (lowercase, hyphenated) — this becomes
+   `/projects/<slug>`.
+2. Fill in `title`, `projectType`, `shortDescription`, `location`, `dates`, and
+   `description` (use a blank line for paragraph breaks).
+3. Drop images in `public/projectImages/<slug>/` named `01.webp`, `02.webp`, … Numbered
+   files are auto-detected; `01` is the hero and the rest form the gallery.
 
-The editor (`app/components/ShaderEditor.tsx`) exposes grouped sliders with precise
-numeric inputs (animation, cursor, texture, and spectral controls), colour-mode and
-custom-colour pickers, and per-control reset. **Changes auto-save to `localStorage`**
-on every edit (debounced) under the `illuminate-settings` key, so tuned values persist
-and become the page's defaults. Use **Copy JSON** / **Import** to move a configuration
-between machines, **Reset all** to return to `DEFAULT_SETTINGS`, and `Esc` to close.
+The route, gallery, and prev/next navigation are generated automatically — no routing
+changes needed.
 
-To make the editor always visible (e.g. a permanent toggle), render it unconditionally
-instead of gating on the shortcut/URL in `ShaderEditor.tsx`.
+## Admin dashboard
 
-## Project Pages System
+A dark dashboard at **`/admin`** manages content. Auth is a cookie session
+(`middleware.ts` + `app/api/admin/*`). Credentials are **`admin` / `admin`** for now —
+swap the hardcoded values in `app/admin/auth-constants.ts` for environment variables
+before any real deployment.
 
-Project pages are data-driven.
+- **Projects** — image-thumbnail cards. Editing opens a two-pane view: a form beside a
+  **live preview** of the `/projects/<slug>` page that updates as you type. Project
+  images are previewed from `public/projectImages/<slug>/` (read-only here).
+- **Team** — create/edit/remove members and **upload photos** (seeded from
+  `app/team-data.ts`).
 
-1. Add a new project object to `projectPageSeeds` in `app/projects-data.ts`.
-2. Give it a unique `slug` (this becomes route path `/projects/your-slug`).
-3. Provide copy fields (title, short description, description, etc).
-4. Set `imageCount` to match available numbered images.
+### Persistence
 
-The route is generated automatically through `app/projects/[projectSlug]/page.tsx` and `generateStaticParams`.
+Admin changes are **localStorage-only** (per-browser) — they don't change what visitors
+see, and uploaded team photos are stored as data URLs. Use **Copy JSON** in the Projects
+section to export edits back into `app/projects-data.ts`. Promoting the admin to a server
+file or database is the next step for making edits go live.
 
-### Image Convention
+## Conventions
 
-Store project media in:
-
-`public/projectImages/{slug}/`
-
-Numbered files:
-
-- `01.webp`
-- `02.webp`
-- `03.webp`
-- `04.webp`
-- etc.
-
-The first image (`01.webp`) is used as the hero image and all numbered images are used by the gallery.
-
-## Admin Dashboard
-
-A password-gated dark dashboard lives at `/admin` (login `admin` / `admin` for now —
-swap the hardcoded creds in `app/admin/auth-constants.ts` for env vars before any
-real deployment). Auth is a cookie session via `middleware.ts`.
-
-It has two sections:
-
-- **Projects** — image-thumbnail cards for every project. Editing opens a two-pane
-  view: a form on the left and a **live preview** of the `/projects/[slug]` page on
-  the right that updates as you type. Project images are previewed from
-  `public/projectImages/{slug}/` (read-only here).
-- **Team** — manage team members and **upload their photos** (stored as data URLs).
-  Seeded from `app/team-data.ts`.
-
-Persistence is **localStorage-only** (per-browser; it doesn't change what visitors
-see). Use **Copy JSON** to export project edits into `app/projects-data.ts`. Moving
-this to a server file or database is the next step when edits need to go live.
-
-## Global Styles
-
-`app/globals.css` includes:
-
-- brand colour variable (`--brand-color`, `#FF34B1`)
-- text selection highlight styling
-- black base background
-- desktop-only custom cursor behavior
-
-## Notes for Contributors
-
-- Reuse existing components before introducing one-off markup.
-- Keep project content inside `app/projects-data.ts` (not hardcoded in route files).
-- Preserve route slugs and image naming conventions to avoid broken links.
-- See [CLAUDE.md](CLAUDE.md) for the full coding conventions and design-system rules.
+Coding conventions and design-system rules (TypeScript strictness, British spelling,
+no decorative borders/shadows, CSS-variable colours, etc.) are documented in
+[CLAUDE.md](CLAUDE.md). In short: reuse `app/components/ui/` primitives before adding
+one-off markup, keep project content in `app/projects-data.ts`, and preserve slug and
+image-naming conventions to avoid broken links.

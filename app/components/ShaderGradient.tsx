@@ -1,9 +1,17 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ShaderSettings } from '@/app/hooks/useShaderSettings';
 
-export default function ShaderGradient({ 
+/**
+ * Full-screen WebGL 2 gradient that paints behind the whole site.
+ *
+ * The effect builds the shader program once per `settings` change, then runs a
+ * requestAnimationFrame loop that pushes uniforms (time, mouse trail, scroll
+ * offset, colours) each frame. If WebGL 2 is unavailable or the program fails to
+ * build, it falls back to a static CSS gradient so the page is never blank.
+ */
+export default function ShaderGradient({
   settings, 
   scrollColor,
   scrollColorRgb,
@@ -23,6 +31,9 @@ export default function ShaderGradient({
   const mouseTrailRef = useRef<Array<{ x: number; y: number }>>(
     Array(8).fill({ x: 0, y: 0 })
   );
+  // Set when WebGL 2 is unavailable or the program fails to build, so we can
+  // render a static gradient fallback instead of a blank canvas.
+  const [renderFailed, setRenderFailed] = useState(false);
 
   useEffect(() => {
     scrollColorRef.current = scrollColor;
@@ -36,9 +47,11 @@ export default function ShaderGradient({
 
     const gl = canvas.getContext('webgl2');
     if (!gl) {
-      console.error('WebGL 2 not supported');
+      console.error('WebGL 2 is not supported in this browser; using gradient fallback.');
+      setRenderFailed(true);
       return;
     }
+    setRenderFailed(false);
 
     // Set canvas to window size
     const resizeCanvas = () => {
@@ -245,11 +258,17 @@ export default function ShaderGradient({
     const vertexShader = compileShader(vertexShaderSource, gl.VERTEX_SHADER);
     const fragmentShader = compileShader(fragmentShaderSource, gl.FRAGMENT_SHADER);
 
-    if (!vertexShader || !fragmentShader) return;
+    if (!vertexShader || !fragmentShader) {
+      setRenderFailed(true);
+      return;
+    }
 
     // Link program
     const program = gl.createProgram();
-    if (!program) return;
+    if (!program) {
+      setRenderFailed(true);
+      return;
+    }
 
     gl.attachShader(program, vertexShader);
     gl.attachShader(program, fragmentShader);
@@ -257,6 +276,7 @@ export default function ShaderGradient({
 
     if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
       console.error(`Program linking error: ${gl.getProgramInfoLog(program)}`);
+      setRenderFailed(true);
       return;
     }
 
@@ -328,7 +348,11 @@ export default function ShaderGradient({
       return [f(0), f(8), f(4)];
     };
 
-    // Animation loop
+    // Animation loop. The frame id is captured so cleanup can cancel it — without
+    // this, every `settings` change would leave the previous loop running against
+    // a now-deleted program.
+    let animationFrameId = 0;
+
     const animate = () => {
       const elapsed = (Date.now() - startTime) / 1000;
 
@@ -414,14 +438,24 @@ export default function ShaderGradient({
       gl.clear(gl.COLOR_BUFFER_BIT);
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 
-      requestAnimationFrame(animate);
+      animationFrameId = requestAnimationFrame(animate);
     };
+
+    // Stop drawing if the GPU drops the context (e.g. tab backgrounded, driver
+    // reset); preventDefault keeps the context eligible for restoration.
+    const handleContextLost = (event: Event) => {
+      event.preventDefault();
+      cancelAnimationFrame(animationFrameId);
+    };
+    canvas.addEventListener('webglcontextlost', handleContextLost);
 
     animate();
 
     return () => {
+      cancelAnimationFrame(animationFrameId);
       window.removeEventListener('resize', resizeCanvas);
       window.removeEventListener('mousemove', handleMouseMove);
+      canvas.removeEventListener('webglcontextlost', handleContextLost);
       gl.deleteProgram(program);
       gl.deleteShader(vertexShader);
       gl.deleteShader(fragmentShader);
@@ -430,9 +464,21 @@ export default function ShaderGradient({
   }, [settings]);
 
   return (
-    <canvas
-      ref={canvasRef}
-      className="fixed inset-0 w-full h-full pointer-events-none"
-    />
+    <>
+      {renderFailed && (
+        <div
+          aria-hidden="true"
+          className="fixed inset-0 -z-10 pointer-events-none"
+          style={{
+            background:
+              'radial-gradient(circle at 30% 20%, var(--brand-color), transparent 55%), radial-gradient(circle at 75% 75%, #2a0030, #000)',
+          }}
+        />
+      )}
+      <canvas
+        ref={canvasRef}
+        className="fixed inset-0 w-full h-full pointer-events-none"
+      />
+    </>
   );
 }

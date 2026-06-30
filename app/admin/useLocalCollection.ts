@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 
-export type SaveStatus = 'idle' | 'saved';
+export type SaveStatus = 'idle' | 'saved' | 'error';
 
 /**
  * Holds a collection in React state, hydrating from localStorage (falling back
@@ -32,12 +32,21 @@ export function useLocalCollection<T>(storageKey: string, seed: T[]) {
   useEffect(() => {
     if (!hydrated.current) return;
     const timeout = setTimeout(() => {
-      localStorage.setItem(storageKey, JSON.stringify(items));
-      setSaveStatus('saved');
+      try {
+        localStorage.setItem(storageKey, JSON.stringify(items));
+        setSaveStatus('saved');
+      } catch (e) {
+        // Most likely the storage quota was exceeded — uploaded photos are kept
+        // as data URLs, which add up quickly. Surface it rather than silently
+        // dropping the change.
+        console.error(`Could not save "${storageKey}" to localStorage:`, e);
+        setSaveStatus('error');
+      }
     }, 250);
     return () => clearTimeout(timeout);
   }, [items, storageKey]);
 
+  // Clear the transient "saved" flash; leave "error" visible until the next save.
   useEffect(() => {
     if (saveStatus !== 'saved') return;
     const timeout = setTimeout(() => setSaveStatus('idle'), 1400);
