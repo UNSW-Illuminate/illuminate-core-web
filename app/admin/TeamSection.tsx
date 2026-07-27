@@ -10,7 +10,9 @@ const STORAGE_KEY = 'illuminate-admin-team';
 const newId = () =>
   typeof crypto !== 'undefined' && 'randomUUID' in crypto ? crypto.randomUUID() : `m-${Date.now()}`;
 
-const blankMember = (): TeamMember => ({ id: newId(), name: '', role: '' });
+// New members land in the general roster; the leads groups are curated in
+// team-data.ts rather than edited here.
+const blankMember = (): TeamMember => ({ id: newId(), name: '', role: '', group: 'members' });
 
 const initials = (name: string) =>
   name

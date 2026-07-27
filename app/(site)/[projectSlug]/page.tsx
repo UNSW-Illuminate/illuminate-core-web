@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
 import ProjectPageLayout from '@/app/components/ProjectPageLayout';
-import { getAdjacentProjects, getDiscoverMoreProjects, getProjectBySlug, projectPages } from '@/app/projects-data';
+import { getAdjacentProjects, getProjectBySlug, projectPages } from '@/app/projects-data';
 
 type ProjectPageProps = {
   params: Promise<{
@@ -24,6 +24,15 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
 
   const { previousProject, nextProject } = getAdjacentProjects(project.slug);
 
+  const allProjects = projectPages.map((entry) => ({
+    slug: entry.slug,
+    title: entry.title,
+    projectType: entry.projectType,
+    location: entry.location,
+    dates: entry.dates,
+    thumbnail: entry.heroImage,
+  }));
+
   return (
     <ProjectPageLayout
       currentSlug={project.slug}
@@ -35,9 +44,9 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
       description={project.description}
       heroImage={project.heroImage}
       galleryImages={project.galleryImages}
-      previousProject={previousProject ? { title: previousProject.title, href: `/projects/${previousProject.slug}` } : undefined}
-      nextProject={nextProject ? { title: nextProject.title, href: `/projects/${nextProject.slug}` } : undefined}
-      discoverMoreProjects={getDiscoverMoreProjects(project.slug)}
+      previousProject={previousProject ? { title: previousProject.title, href: `/${previousProject.slug}` } : undefined}
+      nextProject={nextProject ? { title: nextProject.title, href: `/${nextProject.slug}` } : undefined}
+      allProjects={allProjects}
     />
   );
 }

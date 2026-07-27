@@ -3,22 +3,18 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import AnimatedTextLink from './ui/AnimatedTextLink';
+import { useState } from 'react';
+import OtherProjects from './OtherProjects';
+import { type ProjectCardItem } from './ProjectCard';
 import ButtonLink from './ui/ButtonLink';
 import ContentContainer from './ui/ContentContainer';
+import ImageLightbox from './ui/ImageLightbox';
 import SectionHeading from './ui/SectionHeading';
 import SectionLabel from './ui/SectionLabel';
 
 type ProjectImage = {
   src: string;
   alt: string;
-};
-
-type DiscoverProject = {
-  title: string;
-  href?: string;
-  type: string;
-  shortDescription: string;
 };
 
 type ProjectNavItem = {
@@ -38,7 +34,8 @@ type ProjectPageLayoutProps = {
   galleryImages: ProjectImage[];
   previousProject?: ProjectNavItem;
   nextProject?: ProjectNavItem;
-  discoverMoreProjects: DiscoverProject[];
+  /** Every project, newest first; the one in view is filtered out downstream. */
+  allProjects: ProjectCardItem[];
 };
 
 const enterUp = {
@@ -55,6 +52,12 @@ const enterSoft = {
   transition: { duration: 0.8, ease: [0.22, 1, 0.36, 1] as const },
 };
 
+/** Images per gallery block: one full-width image followed by a pair. */
+const GALLERY_GROUP_SIZE = 3;
+
+/** Shared affordance for every image that opens the lightbox. */
+const enlargeableImageClassName = 'block w-full overflow-hidden transition-opacity hover:opacity-80';
+
 export default function ProjectPageLayout({
   currentSlug,
   title,
@@ -67,16 +70,24 @@ export default function ProjectPageLayout({
   galleryImages,
   previousProject,
   nextProject,
-  discoverMoreProjects,
+  allProjects,
 }: ProjectPageLayoutProps) {
-  const galleryGroups: ProjectImage[][] = [];
+  const [activeImageIndex, setActiveImageIndex] = useState<number | null>(null);
 
-  for (let i = 0; i < galleryImages.length; i += 3) {
-    galleryGroups.push(galleryImages.slice(i, i + 3));
-  }
+  // Keep each image's position in the flat gallery list so the lightbox opens
+  // on whichever image was clicked and can page through the rest.
+  const galleryEntries = galleryImages.map((image, index) => ({ image, index }));
+
+  const galleryGroups = Array.from(
+    { length: Math.ceil(galleryEntries.length / GALLERY_GROUP_SIZE) },
+    (_, groupIndex) =>
+      galleryEntries.slice(groupIndex * GALLERY_GROUP_SIZE, (groupIndex + 1) * GALLERY_GROUP_SIZE),
+  );
+
+  const heroIndex = galleryImages.findIndex((image) => image.src === heroImage?.src);
 
   return (
-    <main id="project-top" className="min-h-screen  text-white px-6 py-16 md:px-12 lg:px-20">
+    <main id="project-top" className="min-h-screen  text-white px-6 pb-16 pt-28 md:px-12 md:pt-32 lg:px-20">
       <ContentContainer>
         <motion.div
           initial={{ opacity: 0, y: -18 }}
@@ -93,7 +104,7 @@ export default function ProjectPageLayout({
           </Link>
 
           <div className="flex flex-wrap items-center justify-end gap-3">
-            {previousProject && previousProject.href !== `/projects/${currentSlug}` ? (
+            {previousProject && previousProject.href !== `/${currentSlug}` ? (
               <div className="w-full sm:w-auto sm:min-w-[168px]">
                 <ButtonLink
                   href={previousProject.href}
@@ -111,7 +122,7 @@ export default function ProjectPageLayout({
               </div>
             ) : null}
 
-            {nextProject && nextProject.href !== `/projects/${currentSlug}` ? (
+            {nextProject && nextProject.href !== `/${currentSlug}` ? (
               <div className="w-full sm:w-auto sm:min-w-[152px]">
                 <ButtonLink
                   href={nextProject.href}
@@ -148,7 +159,12 @@ export default function ProjectPageLayout({
 
           <motion.article className="md:col-span-3" initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.75, delay: 0.24, ease: [0.22, 1, 0.36, 1] }}>
             {heroImage && (
-              <div className="relative overflow-hidden ">
+              <button
+                type="button"
+                aria-label={`Enlarge ${heroImage.alt}`}
+                className={enlargeableImageClassName}
+                onClick={() => setActiveImageIndex(heroIndex === -1 ? 0 : heroIndex)}
+              >
                 <Image
                   src={heroImage.src}
                   alt={heroImage.alt}
@@ -157,7 +173,7 @@ export default function ProjectPageLayout({
                   className="h-auto w-full object-cover"
                   priority
                 />
-              </div>
+              </button>
             )}
 
             <div className="mt-6 flex flex-wrap items-center gap-6 text-base text-white">
@@ -165,7 +181,7 @@ export default function ProjectPageLayout({
               <p>{dates}</p>
             </div>
 
-            <div className="mt-8 max-w-4xl text-4xl text-white/92">
+            <div className="mt-8 max-w-4xl text-4xl text-white/90">
               <p className="whitespace-pre-line">{description}</p>
             </div>
           </motion.article>
@@ -180,27 +196,38 @@ export default function ProjectPageLayout({
             <div className="mt-8 space-y-8">
               {galleryGroups.map((group, groupIndex) => (
                 <motion.div
-                  key={`${group[0]?.src}-${groupIndex}`}
+                  key={`${group[0]?.image.src}-${groupIndex}`}
                   className="space-y-4"
                   {...enterSoft}
                   transition={{ duration: 0.75, delay: groupIndex * 0.08, ease: [0.22, 1, 0.36, 1] }}
                 >
                   {group[0] && (
-                    <div className="relative w-full overflow-hidden  ">
+                    <button
+                      type="button"
+                      aria-label={`Enlarge ${group[0].image.alt}`}
+                      className={enlargeableImageClassName}
+                      onClick={() => setActiveImageIndex(group[0].index)}
+                    >
                       <Image
-                        src={group[0].src}
-                        alt={group[0].alt}
+                        src={group[0].image.src}
+                        alt={group[0].image.alt}
                         width={1800}
                         height={1100}
                         className="h-auto w-full object-cover"
                       />
-                    </div>
+                    </button>
                   )}
 
                   {group.length > 1 && (
                     <div className="grid gap-4 md:grid-cols-2">
-                      {group.slice(1).map((image) => (
-                        <div key={image.src + image.alt} className="relative overflow-hidden ">
+                      {group.slice(1).map(({ image, index }) => (
+                        <button
+                          key={image.src + image.alt}
+                          type="button"
+                          aria-label={`Enlarge ${image.alt}`}
+                          className={enlargeableImageClassName}
+                          onClick={() => setActiveImageIndex(index)}
+                        >
                           <Image
                             src={image.src}
                             alt={image.alt}
@@ -208,7 +235,7 @@ export default function ProjectPageLayout({
                             height={650}
                             className="h-full w-full object-cover"
                           />
-                        </div>
+                        </button>
                       ))}
                     </div>
                   )}
@@ -219,31 +246,7 @@ export default function ProjectPageLayout({
         </motion.section>
       )}
 
-      <motion.section className="mt-20 pb-8" {...enterUp}>
-        <ContentContainer>
-        <SectionHeading as="h2" className="text-2xl md:text-3xl">Discover More</SectionHeading>
-
-        <div className="mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {discoverMoreProjects.map((project) => (
-            <motion.article
-              key={project.title}
-              className="bg-white/[0.02] p-5 transition-colors hover:bg-white/[0.04]"
-              {...enterSoft}
-            >
-              <SectionLabel className="text-sm text-white/55">{project.type}</SectionLabel>
-              {project.href ? (
-                <AnimatedTextLink href={project.href} className="mt-2 text-2xl font-light text-white hover:text-white/80">
-                  {project.title}
-                </AnimatedTextLink>
-              ) : (
-                <SectionHeading as="h3" className="mt-2 text-2xl">{project.title}</SectionHeading>
-              )}
-              <p className="mt-3 text-sm leading-relaxed text-white/75">{project.shortDescription}</p>
-            </motion.article>
-          ))}
-        </div>
-        </ContentContainer>
-      </motion.section>
+      <OtherProjects projects={allProjects} currentSlug={currentSlug} />
 
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -271,6 +274,13 @@ export default function ProjectPageLayout({
           </ButtonLink>
         </div>
       </motion.div>
+
+      <ImageLightbox
+        images={galleryImages}
+        activeIndex={activeImageIndex}
+        onClose={() => setActiveImageIndex(null)}
+        onNavigate={setActiveImageIndex}
+      />
     </main>
   );
 }

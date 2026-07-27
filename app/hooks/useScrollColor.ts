@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 export type SectionColor = {
   hue: number;
@@ -75,76 +75,118 @@ function mixColor(from: SectionColor, to: SectionColor, t: number): SectionColor
   };
 }
 
+type ScrollState = {
+  color: SectionColor;
+  section: string;
+  progress: number;
+};
+
+const clamp01 = (value: number) => Math.min(Math.max(value, 0), 1);
+
+/** Skips a re-render when a scroll frame lands on the same colour and section. */
+function isSameScrollState(a: ScrollState, b: ScrollState): boolean {
+  return (
+    a.section === b.section &&
+    a.progress === b.progress &&
+    a.color.hue === b.color.hue &&
+    a.color.saturation === b.color.saturation &&
+    a.color.lightness === b.color.lightness
+  );
+}
+
+/** HSL to hex, for CSS consumers. */
+function hslToHex(h: number, s: number, l: number): string {
+  const [r, g, b] = hslToRgbNormalized(h, s, l);
+  return '#' + [r, g, b].map((x) => Math.round(x * 255).toString(16).padStart(2, '0')).join('');
+}
+
+/** HSL to normalised 0..1 RGB, the form the shader uniforms expect. */
+function hslToRgbNormalized(h: number, s: number, l: number): [number, number, number] {
+  const saturation = s / 100;
+  const lightness = l / 100;
+  const k = (n: number) => (n + h / 30) % 12;
+  const a = saturation * Math.min(lightness, 1 - lightness);
+  const f = (n: number) => lightness - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1)));
+  return [f(0), f(8), f(4)];
+}
+
 export function useScrollColor() {
-  const [currentColor, setCurrentColor] = useState<SectionColor>(FRAMES[0].from);
-  const [currentSection, setCurrentSection] = useState<string>(FRAMES[0].id);
-  const [scrollProgress, setScrollProgress] = useState(0);
-  const scrollListenerRef = useRef<(() => void) | null>(null);
+  // One state object, updated at most once per frame: the previous version set
+  // three pieces of state on every scroll event, re-rendering the whole gradient
+  // tree several times per frame while Lenis was animating.
+  const [scrollState, setScrollState] = useState<ScrollState>(() => ({
+    color: FRAMES[0].from,
+    section: FRAMES[0].id,
+    progress: 0,
+  }));
 
   useEffect(() => {
-    const handleScroll = () => {
-      const scrollY = window.scrollY;
+    let frameId = 0;
+
+    const readScrollState = (): ScrollState => {
       const maxScroll = Math.max(document.documentElement.scrollHeight - window.innerHeight, 1);
-      const progress = Math.min(Math.max(scrollY / maxScroll, 0), 1);
-      setScrollProgress(progress);
+      const progress = clamp01(window.scrollY / maxScroll);
 
-      const frame = FRAMES.find((f) => progress >= f.start && progress <= f.end) ?? FRAMES[FRAMES.length - 1];
+      const firstFrame = FRAMES[0];
+      const lastFrame = FRAMES[FRAMES.length - 1];
+
+      if (progress <= firstFrame.start) {
+        return { color: firstFrame.from, section: firstFrame.id, progress };
+      }
+
+      if (progress >= lastFrame.end) {
+        return { color: lastFrame.to, section: lastFrame.id, progress };
+      }
+
+      const frame = FRAMES.find((f) => progress >= f.start && progress <= f.end) ?? lastFrame;
       const frameRange = Math.max(frame.end - frame.start, 1e-6);
-      const localT = Math.min(Math.max((progress - frame.start) / frameRange, 0), 1);
+      const localT = clamp01((progress - frame.start) / frameRange);
 
-      setCurrentSection(frame.id);
-      setCurrentColor(mixColor(frame.from, frame.to, localT));
-
-      if (progress <= FRAMES[0].start) {
-        setCurrentSection(FRAMES[0].id);
-        setCurrentColor(FRAMES[0].from);
-      }
-
-      if (progress >= FRAMES[FRAMES.length - 1].end) {
-        const last = FRAMES[FRAMES.length - 1];
-        setCurrentSection(last.id);
-        setCurrentColor(last.to);
-      }
+      return { color: mixColor(frame.from, frame.to, localT), section: frame.id, progress };
     };
 
-    scrollListenerRef.current = handleScroll;
+    const handleScroll = () => {
+      // Coalesce bursts of scroll events into a single update per frame.
+      if (frameId) return;
+
+      frameId = requestAnimationFrame(() => {
+        frameId = 0;
+        const next = readScrollState();
+        setScrollState((previous) => (isSameScrollState(previous, next) ? previous : next));
+      });
+    };
+
     window.addEventListener('scroll', handleScroll, { passive: true });
-    handleScroll();
+    window.addEventListener('resize', handleScroll);
+    setScrollState(readScrollState());
 
     return () => {
+      cancelAnimationFrame(frameId);
       window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('resize', handleScroll);
     };
   }, []);
 
-  // Convert HSL to RGB hex for shader use
-  const hslToHex = (h: number, s: number, l: number): string => {
-    s /= 100;
-    l /= 100;
-    const k = (n: number) => (n + h / 30) % 12;
-    const a = s * Math.min(l, 1 - l);
-    const f = (n: number) => l - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1)));
-    const r = Math.round(f(0) * 255);
-    const g = Math.round(f(8) * 255);
-    const b = Math.round(f(4) * 255);
-    return '#' + [r, g, b].map(x => x.toString(16).padStart(2, '0')).join('');
-  };
+  const { color, section, progress } = scrollState;
 
-  // Convert HSL to normalized RGB (0-1 range) for WebGL
-  const hslToRgbNormalized = (h: number, s: number, l: number): [number, number, number] => {
-    s /= 100;
-    l /= 100;
-    const k = (n: number) => (n + h / 30) % 12;
-    const a = s * Math.min(l, 1 - l);
-    const f = (n: number) => l - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1)));
-    return [f(0), f(8), f(4)];
-  };
+  // Derived colours are memoised so consumers get stable references and their
+  // own effects don't re-run on every unrelated render.
+  const currentColorHex = useMemo(
+    () => hslToHex(color.hue, color.saturation, color.lightness),
+    [color],
+  );
+
+  const currentColorRgb = useMemo(
+    () => hslToRgbNormalized(color.hue, color.saturation, color.lightness),
+    [color],
+  );
 
   return {
-    currentColor,
-    currentColorHex: hslToHex(currentColor.hue, currentColor.saturation, currentColor.lightness),
-    currentColorRgb: hslToRgbNormalized(currentColor.hue, currentColor.saturation, currentColor.lightness),
-    currentSection,
-    scrollProgress,
+    currentColor: color,
+    currentColorHex,
+    currentColorRgb,
+    currentSection: section,
+    scrollProgress: progress,
     sections: FRAMES,
   };
 }

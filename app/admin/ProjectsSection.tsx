@@ -187,7 +187,7 @@ export default function ProjectsSection({ seed, imagesBySlug }: ProjectsSectionP
                       Edit
                     </button>
                     <a
-                      href={`/projects/${project.slug}`}
+                      href={`/${project.slug}`}
                       target="_blank"
                       rel="noreferrer"
                       className="text-white/50 transition-opacity hover:opacity-70"

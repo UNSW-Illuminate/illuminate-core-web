@@ -19,16 +19,16 @@ export type ShaderSettings = {
 };
 
 export const DEFAULT_SETTINGS: ShaderSettings = {
-  animationSpeed: 1.0,
+  animationSpeed: 0.1,
   grainIntensity: 0.05,
   circleRadius: 200,
   trailDrag: 0.04,
   rippleIntensity: 0.4,
   colorMode: 'spectral',
-  spectralHueShift: 200,
-  spectralScale: 50,
-  spectralTimeShift: 80,
-  spectralSaturation: 1,
+  spectralHueShift: -120,
+  spectralScale: 15,
+  spectralTimeShift: 47,
+  spectralSaturation: 0.9,
   customColor1: '#000000',
   customColor2: '#ff00cc',
   customColor3: '#ff0000',

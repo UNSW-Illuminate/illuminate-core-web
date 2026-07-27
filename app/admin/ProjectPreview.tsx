@@ -9,7 +9,7 @@ type ProjectPreviewProps = {
   images: string[];
 };
 
-// A faithful-but-compact rendering of the real /projects/[slug] page so editors
+// A faithful-but-compact rendering of the real /[slug] page so editors
 // can see roughly what they're shipping while they type.
 export default function ProjectPreview({ draft, images }: ProjectPreviewProps) {
   const hero = images[0];

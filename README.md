@@ -29,7 +29,7 @@ npm run lint     # eslint (next/core-web-vitals)
 app/
   (site)/                     # public marketing site (custom cursor, footer, smooth scroll)
     page.tsx                  # landing page sections
-    projects/[projectSlug]/   # /projects/<slug> — generated from projects-data.ts
+    [projectSlug]/            # /<slug> — project pages generated from projects-data.ts
   admin/                      # password-gated dashboard (own layout, no marketing chrome)
   api/admin/                  # login / logout route handlers (cookie session)
   components/                 # shared components incl. ShaderGradient, ProjectPageLayout
@@ -39,7 +39,7 @@ app/
 middleware.ts                 # gates everything under /admin
 ```
 
-Routing note: project pages live under `/projects/<slug>`. The public site sits in a
+Routing note: project pages live at the root, `/<slug>`. The public site sits in a
 `(site)` route group so `/admin` can opt out of the global cursor, footer, and
 smooth-scroll chrome.
 
@@ -71,7 +71,7 @@ unconditionally instead of gating on the shortcut/URL.
 Project pages are data-driven from `projectPageSeeds` in `app/projects-data.ts`.
 
 1. Add a project object with a unique `slug` (lowercase, hyphenated) — this becomes
-   `/projects/<slug>`.
+   `/<slug>`.
 2. Fill in `title`, `projectType`, `shortDescription`, `location`, `dates`, and
    `description` (use a blank line for paragraph breaks).
 3. Drop images in `public/projectImages/<slug>/` named `01.webp`, `02.webp`, … Numbered
@@ -88,7 +88,7 @@ swap the hardcoded values in `app/admin/auth-constants.ts` for environment varia
 before any real deployment.
 
 - **Projects** — image-thumbnail cards. Editing opens a two-pane view: a form beside a
-  **live preview** of the `/projects/<slug>` page that updates as you type. Project
+  **live preview** of the `/<slug>` page that updates as you type. Project
   images are previewed from `public/projectImages/<slug>/` (read-only here).
 - **Team** — create/edit/remove members and **upload photos** (seeded from
   `app/team-data.ts`).

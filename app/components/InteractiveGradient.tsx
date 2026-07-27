@@ -2,6 +2,7 @@
 
 import ShaderGradient from './ShaderGradient';
 import ShaderEditor from './ShaderEditor';
+import GrainOverlay from './GrainOverlay';
 import { useShaderSettings } from '@/app/hooks/useShaderSettings';
 import { useScrollColor } from '@/app/hooks/useScrollColor';
 
@@ -25,6 +26,7 @@ export default function InteractiveGradient() {
         scrollColorRgb={currentColorRgb}
         scrollProgress={scrollProgress}
       />
+      <GrainOverlay />
       <ShaderEditor
         settings={settings}
         onUpdateSetting={updateSetting}

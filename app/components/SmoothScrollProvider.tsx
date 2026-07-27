@@ -26,6 +26,11 @@ export function SmoothScrollProvider({ children }: { children: React.ReactNode }
       });
     };
 
+    // Overlays (e.g. the image lightbox) freeze the page behind them by
+    // dispatching these events rather than reaching for the Lenis instance.
+    const handleStop = () => lenis.stop();
+    const handleStart = () => lenis.start();
+
     // Animation loop for Lenis
     function raf(time: number) {
       lenis.raf(time);
@@ -33,10 +38,14 @@ export function SmoothScrollProvider({ children }: { children: React.ReactNode }
     }
 
     window.addEventListener('lenis-scroll-top', handleScrollToTop);
+    window.addEventListener('lenis-stop', handleStop);
+    window.addEventListener('lenis-start', handleStart);
     requestAnimationFrame(raf);
 
     return () => {
       window.removeEventListener('lenis-scroll-top', handleScrollToTop);
+      window.removeEventListener('lenis-stop', handleStop);
+      window.removeEventListener('lenis-start', handleStart);
       lenis.destroy();
     };
   }, []);

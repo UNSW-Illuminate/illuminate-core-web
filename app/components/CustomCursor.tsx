@@ -44,7 +44,7 @@ export default function CustomCursor() {
   return (
     <div
       ref={cursorRef}
-      className="pointer-events-none fixed top-0 left-0 z-[9999] hidden h-8 w-8 opacity-0 md:block"
+      className="custom-cursor pointer-events-none fixed top-0 left-0 z-[9999] hidden h-8 w-8 opacity-0 md:block"
     >
       <div className="drop-shadow-[0_0_4px_rgba(255,255,255,0.3)]">
         <CursorIcon size={32} />

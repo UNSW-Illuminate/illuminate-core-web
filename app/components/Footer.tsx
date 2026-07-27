@@ -7,8 +7,8 @@ import SectionLabel from './ui/SectionLabel';
 
 const footerLinks = [
   { label: 'Projects', href: '/#projects' },
-  { label: 'Team', href: '/#team' },
-  { label: 'Contact', href: '/#contact' },
+  { label: 'Team', href: '/team' },
+  { label: 'Contact', href: '/contact' },
   { label: 'Join Us', href: 'mailto:admin@unswilluminate.com?subject=Join%20UNSW%20Illuminate' },
 ];
 

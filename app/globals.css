@@ -40,12 +40,51 @@ body {
   background: #000;
 }
 
+/* Film-grain layer painted over the shader gradient (see GrainOverlay.tsx).
+   The noise is a tiled SVG turbulence pattern, desaturated to grey and blended
+   with `overlay` so it textures the gradient rather than greying it out. */
+.grain-overlay {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='grain'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23grain)'/%3E%3C/svg%3E");
+  background-size: 200px 200px;
+  opacity: 0.22;
+  mix-blend-mode: overlay;
+  animation: grain-shift 0.7s steps(1, end) infinite;
+}
+
+/* Jumping the tile between frames reads as live film grain instead of a static
+   texture. Background position keeps the layer edge-to-edge, unlike transform. */
+@keyframes grain-shift {
+  0% { background-position: 0 0; }
+  12.5% { background-position: -18px 10px; }
+  25% { background-position: 14px -22px; }
+  37.5% { background-position: -26px -14px; }
+  50% { background-position: 22px 18px; }
+  62.5% { background-position: -10px 26px; }
+  75% { background-position: 26px -8px; }
+  87.5% { background-position: -22px -26px; }
+  100% { background-position: 0 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .grain-overlay {
+    animation: none;
+  }
+}
+
 @media (hover: hover) and (pointer: fine) {
   * {
     cursor: none;
   }
 
   canvas {
+    cursor: none;
+  }
+
+  /* Tailwind's preflight sets `cursor: pointer` on buttons, and an element
+     selector outranks the `*` rule above — so name them to keep our own cursor
+     on close, previous, and next controls. */
+  button,
+  [role='button'] {
     cursor: none;
   }
 

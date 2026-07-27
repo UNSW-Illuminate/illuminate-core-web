@@ -86,20 +86,24 @@ export default function ShaderEditor({
   isOpen,
   setIsOpen,
 }: ShaderEditorProps) {
-  const [copied, setCopied] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
   const [importText, setImportText] = useState('');
   const [importError, setImportError] = useState<string | null>(null);
 
-  // Open automatically from a shareable URL (?editor or #editor); toggle with
-  // Cmd/Ctrl+. and close with Escape. Keeps the tool off the public page by default.
+  // Open automatically from a shareable URL (?editor or #editor), which works
+  // everywhere and takes deliberate intent. The Cmd/Ctrl+. toggle is a
+  // development convenience only — on the live site a visitor pressing it
+  // should not surface an internal tool. Escape always closes.
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.has('editor') || window.location.hash === '#editor') {
       setIsOpen(true);
     }
+
+    const shortcutEnabled = process.env.NODE_ENV !== 'production';
+
     const onKeyDown = (event: KeyboardEvent) => {
-      if ((event.metaKey || event.ctrlKey) && event.key === '.') {
+      if (shortcutEnabled && (event.metaKey || event.ctrlKey) && event.key === '.') {
         event.preventDefault();
         setIsOpen((open) => !open);
       } else if (event.key === 'Escape') {
@@ -114,17 +118,9 @@ export default function ShaderEditor({
 
   const groups = settings.colorMode === 'spectral' ? [...BASE_GROUPS, SPECTRAL_GROUP] : BASE_GROUPS;
 
-  const handleCopy = async () => {
-    try {
-      await navigator.clipboard.writeText(JSON.stringify(settings, null, 2));
-      setCopied(true);
-      setTimeout(() => setCopied(false), 1200);
-    } catch {
-      setCopied(false);
-    }
-  };
-
-  const handleImport = () => {
+  // Unknown or malformed fields are filled from the defaults by coerceSettings,
+  // so a partial paste applies what it can rather than being rejected.
+  const handleApply = () => {
     try {
       onReplaceSettings(JSON.parse(importText));
       setImportError(null);
@@ -230,7 +226,7 @@ export default function ShaderEditor({
             <div className="mt-2 flex gap-2">
               <button
                 type="button"
-                onClick={handleImport}
+                onClick={handleApply}
                 className="flex-1 rounded bg-white/20 px-3 py-2 text-sm text-white transition-opacity hover:opacity-80"
               >
                 Apply
@@ -260,17 +256,10 @@ export default function ShaderEditor({
         </button>
         <button
           type="button"
-          onClick={handleCopy}
-          className="flex-1 rounded bg-white/10 px-3 py-2 text-sm text-white transition-opacity hover:opacity-80"
-        >
-          {copied ? 'Copied' : 'Copy JSON'}
-        </button>
-        <button
-          type="button"
           onClick={() => setImportOpen((open) => !open)}
           className="flex-1 rounded bg-white/10 px-3 py-2 text-sm text-white transition-opacity hover:opacity-80"
         >
-          Import
+          Apply JSON
         </button>
       </div>
     </div>

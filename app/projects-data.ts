@@ -28,15 +28,8 @@ type ProjectImage = {
   alt: string;
 };
 
-type ProjectDiscoverItem = {
-  title: string;
-  type: string;
-  shortDescription: string;
-  href?: string;
-};
-
 export type ProjectPageData = {
-  /** URL segment, e.g. 'synergy' → /projects/synergy. Must match the image folder name. */
+  /** URL segment, e.g. 'synergy' → /synergy. Must match the image folder name. */
   slug: string;
   title: string;
   projectType: string;
@@ -98,21 +91,15 @@ function buildProjectImages(slug: string, title: string) {
   };
 }
 
-/**
- * Teaser entries shown in "Discover More" lists for projects that don't yet
- * have a full project page. They appear after the real linked projects.
- * once the project is added to projectPageSeeds below it will appear
- * there automatically and can be removed from this list.
- */
-
 // ---------------------------------------------------------------------------
 // HOW TO ADD A PROJECT
 // ---------------------------------------------------------------------------
 // 1. Copy one of the existing seed objects below and paste it at the end of
-//    the array (or wherever chronologically appropriate).
+//    the array. Order within the array doesn't matter — every list is sorted
+//    by `dates`, newest first (see projectsByDate below).
 //
 // 2. Set a unique `slug` (lowercase, hyphen-separated). This becomes the URL:
-//    /projects/[slug]
+//    /[slug]
 //
 // 3. Place images in:
 //    public/projectImages/[slug]/01.webp  (hero — shown first)
@@ -123,11 +110,11 @@ function buildProjectImages(slug: string, title: string) {
 // 4. Fill in title, projectType, shortDescription, location, dates, and
 //    description. Use \n\n in description for paragraph breaks.
 //
-// 5. The project page is automatically available at /projects/[slug] via the
-//    projects/[projectSlug] dynamic route — no routing changes needed.
+// 5. The project page is automatically available at /[slug] via the
+//    app/(site)/[projectSlug] dynamic route — no routing changes needed.
 //
-// 6. If you want the project to appear in "Discover More" on other project
-//    pages, it will do so automatically once it is in this array.
+// 6. The project also joins the landing-page selector and the previous/next
+//    navigation automatically once it is in this array.
 // ---------------------------------------------------------------------------
 const projectPageSeeds: ProjectPageSeed[] = [
   {
@@ -137,7 +124,7 @@ const projectPageSeeds: ProjectPageSeed[] = [
     shortDescription:
       'An interactive nature-inspired installation demonstrating superorganism behaviour through light-reactive ferns and audience movement.',
     location: 'Vivid Sydney',
-    dates: '2025',
+    dates: '2018',
     description:
       "Synergy captures a stunning moment in nature - a large tree surrounded by ferns. It represents the interlinked mechanisms of a superorganism. In these complex beings, inconspicuous organisms demonstrate emergent properties by sharing signals and nutrients for the greater good of the collective. \n\nIn Synergy, this survival mechanism is demonstrated by the illumination of the ferns which are triggered by the passage of visitors along the path.",
   },
@@ -236,12 +223,38 @@ const projectPageSeeds: ProjectPageSeed[] = [
 ];
 
 /**
+ * Reads the most recent year out of a `dates` string so projects can be
+ * ordered chronologically regardless of how the field is written:
+ *   '2025'                  → 2025
+ *   'May–June 2024'         → 2024
+ *   'November 2023 – 2024'  → 2024
+ * Anything without a four-digit year sorts last.
+ */
+function parseProjectYear(dates: string) {
+  const years = dates.match(/\d{4}/g);
+
+  if (!years) {
+    return 0;
+  }
+
+  return Math.max(...years.map(Number));
+}
+
+/**
+ * Newest first. `sort` on a copy keeps projectPageSeeds untouched, and JS sorts
+ * are stable, so projects sharing a year keep their authored order.
+ */
+const projectsByDate: ProjectPageSeed[] = [...projectPageSeeds].sort(
+  (a, b) => parseProjectYear(b.dates) - parseProjectYear(a.dates),
+);
+
+/**
  * Editable project fields (no derived images), exposed for the /admin tool to
  * hydrate from the committed source of truth.
  */
-export const projectSeeds: ProjectPageSeed[] = projectPageSeeds;
+export const projectSeeds: ProjectPageSeed[] = projectsByDate;
 
-export const projectPages: ProjectPageData[] = projectPageSeeds.map((project) => ({
+export const projectPages: ProjectPageData[] = projectsByDate.map((project) => ({
   ...project,
   ...buildProjectImages(project.slug, project.title),
 }));
@@ -267,17 +280,4 @@ export function getAdjacentProjects(currentSlug: string) {
     previousProject,
     nextProject,
   };
-}
-
-export function getDiscoverMoreProjects(currentSlug: string): ProjectDiscoverItem[] {
-  const linkedProjects = projectPages
-    .filter((project) => project.slug !== currentSlug)
-    .map((project) => ({
-      title: project.title,
-      type: project.projectType,
-      shortDescription: project.shortDescription,
-      href: `/projects/${project.slug}`,
-    }));
-
-  return [...linkedProjects];
 }
