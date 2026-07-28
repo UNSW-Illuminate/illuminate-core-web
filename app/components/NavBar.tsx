@@ -1,9 +1,9 @@
 'use client';
 
 import Image from 'next/image';
-import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import AnimatedTextLink from './ui/AnimatedTextLink';
+import TransitionLink from './ui/TransitionLink';
 
 const navItems = [
   { label: 'Projects', href: '/#projects' },
@@ -14,9 +14,11 @@ const navItems = [
 export default function NavBar() {
   const pathname = usePathname();
 
+  // `site-nav` names the bar for view transitions so it holds still while the
+  // page underneath it changes — see globals.css.
   return (
-    <nav className="fixed inset-x-0 top-0 z-50 flex items-center justify-between gap-6 px-6 py-5 md:px-12 md:py-6 lg:px-20">
-      <Link
+    <nav className="site-nav fixed inset-x-0 top-0 z-50 flex items-center justify-between gap-6 px-6 py-5 md:px-12 md:py-6 lg:px-20">
+      <TransitionLink
         href="/"
         aria-label="UNSW Illuminate — home"
         className="flex shrink-0 items-center transition-opacity hover:opacity-80"
@@ -29,7 +31,7 @@ export default function NavBar() {
           priority
           className="h-6 w-auto md:h-7"
         />
-      </Link>
+      </TransitionLink>
 
       <div className="flex items-center gap-6 md:gap-8">
         {navItems.map((item) => (

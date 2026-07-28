@@ -31,6 +31,17 @@ export function SmoothScrollProvider({ children }: { children: React.ReactNode }
     const handleStop = () => lenis.stop();
     const handleStart = () => lenis.start();
 
+    // Next puts the window back to the top on navigation, but Lenis holds its
+    // own scroll position and drives the window back to it on the next frame.
+    // Only Lenis can settle that argument, so navigations say so explicitly.
+    const handleScrollReset = () => {
+      // Lenis skips the work when it already believes it is at the top, so the
+      // window gets told directly as well — the two can disagree after Next
+      // has moved the page out from under it.
+      lenis.scrollTo(0, { immediate: true, force: true });
+      window.scrollTo(0, 0);
+    };
+
     // Animation loop for Lenis
     function raf(time: number) {
       lenis.raf(time);
@@ -38,12 +49,14 @@ export function SmoothScrollProvider({ children }: { children: React.ReactNode }
     }
 
     window.addEventListener('lenis-scroll-top', handleScrollToTop);
+    window.addEventListener('lenis-scroll-reset', handleScrollReset);
     window.addEventListener('lenis-stop', handleStop);
     window.addEventListener('lenis-start', handleStart);
     requestAnimationFrame(raf);
 
     return () => {
       window.removeEventListener('lenis-scroll-top', handleScrollToTop);
+      window.removeEventListener('lenis-scroll-reset', handleScrollReset);
       window.removeEventListener('lenis-stop', handleStop);
       window.removeEventListener('lenis-start', handleStart);
       lenis.destroy();

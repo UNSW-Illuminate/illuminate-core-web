@@ -1,9 +1,9 @@
 'use client';
 
 import Image from 'next/image';
-import Link from 'next/link';
 import { motion } from 'framer-motion';
 import SectionHeading from './ui/SectionHeading';
+import TransitionLink from './ui/TransitionLink';
 
 export type ProjectCardItem = {
   slug: string;
@@ -49,8 +49,12 @@ export default function ProjectCard({
       viewport={{ once: true, amount: 0.2 }}
       transition={{ duration: 0.7, delay, ease: easeOut }}
     >
-      <Link href={`/${project.slug}`} className="group block">
-        <div className={`${mediaFrameClassName} aspect-[4/3]`}>
+      <TransitionLink
+        href={`/${project.slug}`}
+        sharedMediaSlug={project.slug}
+        className="group block"
+      >
+        <div className={`${mediaFrameClassName} aspect-[4/3]`} data-shared-media={project.slug}>
           {project.thumbnail && (
             <Image
               src={project.thumbnail.src}
@@ -72,7 +76,7 @@ export default function ProjectCard({
         <p className="mt-2 text-sm text-white/50 md:text-base">
           {project.projectType} · {project.location}
         </p>
-      </Link>
+      </TransitionLink>
     </motion.article>
   );
 }

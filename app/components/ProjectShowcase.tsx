@@ -1,8 +1,8 @@
 'use client';
 
 import Image from 'next/image';
-import Link from 'next/link';
 import { motion } from 'framer-motion';
+import TransitionLink from './ui/TransitionLink';
 import ProjectCard, {
   mediaFrameClassName,
   mediaImageClassName,
@@ -38,8 +38,15 @@ export default function ProjectShowcase({ projects }: ProjectShowcaseProps) {
   return (
     <div className="w-full">
       <motion.article {...enterUp} transition={{ duration: 0.8, ease: easeOut }}>
-        <Link href={`/${featured.slug}`} className="group block">
-          <div className={`${mediaFrameClassName} aspect-[4/5] md:aspect-[16/9]`}>
+        <TransitionLink
+          href={`/${featured.slug}`}
+          sharedMediaSlug={featured.slug}
+          className="group block"
+        >
+          <div
+            className={`${mediaFrameClassName} aspect-[4/5] md:aspect-[16/9]`}
+            data-shared-media={featured.slug}
+          >
             {featured.thumbnail && (
               <Image
                 src={featured.thumbnail.src}
@@ -94,7 +101,7 @@ export default function ProjectShowcase({ projects }: ProjectShowcaseProps) {
               </span>
             </div>
           </div>
-        </Link>
+        </TransitionLink>
       </motion.article>
 
       {archive.length > 0 && (

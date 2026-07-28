@@ -24,8 +24,8 @@ Interactive website for UNSW Illuminate: a full-screen WebGL shader background, 
 - `app/admin/` — password-gated dark admin UI for project CRUD
 - `app/projects-data.ts` — single source of truth for project content
 - `app/components/` — feature components; `app/components/ui/` — reusable primitives
-- `app/hooks/` — shared hooks (`useShaderSettings`, `useScrollColor`)
-- `app/globals.css` — fonts, brand colour variable, base styles, cursor behaviour
+- `app/hooks/` — shared hooks (`useShaderSettings`, `useScrollColor`, `useViewTransitionNavigate`)
+- `app/globals.css` — fonts, brand colour variable, base styles, cursor behaviour, view-transition rules
 
 ## Coding Conventions
 
@@ -89,6 +89,24 @@ switch (mode.kind) {
 - **Reuse before reinventing** — use existing `app/components/ui/` primitives for repeated patterns before introducing one-off markup.
 - **Components under ~500 lines** — split if larger.
 
+## Motion & Navigation
+
+See the README for how the pieces fit together. The rules:
+
+- **Internal links use `TransitionLink`**, not `next/link` — that is what runs the
+  navigation through the View Transitions API. Import `next/link` only inside
+  `TransitionLink` itself.
+- **Never reach for the Lenis instance from a component.** Anything that moves the page
+  talks to `SmoothScrollProvider` through window events (`lenis-stop`, `lenis-start`,
+  `lenis-scroll-top`, `lenis-scroll-reset`).
+- **`view-transition-name` is applied imperatively and cleared when the transition ends** —
+  a duplicate name anywhere in the document makes the browser drop the whole transition.
+  Shared media pairs up through `data-shared-media="<slug>"` on both frames.
+- **Gate pointer-dependent behaviour on `(hover: hover) and (pointer: fine)`**, never on a
+  viewport-width breakpoint — width says nothing about whether a pointer exists.
+- **Don't animate the entry of a shared-element target** (e.g. the project hero); it is
+  mid-morph on arrival and fading it in leaves a hole.
+
 ## Project Pages System
 
 Project pages are data-driven — see the README for the full convention. In short:
@@ -111,6 +129,7 @@ Project pages are data-driven — see the README for the full convention. In sho
 - [ ] Union types handled exhaustively
 - [ ] Colours use CSS variables — no hardcoded hex
 - [ ] No decorative borders, no shadows, no `hover:scale-*`, no `uppercase`
+- [ ] Internal navigation goes through `TransitionLink`; Lenis is driven by window events
 - [ ] Components under ~500 lines
 - [ ] British spelling in our own identifiers, comments, and copy
 - [ ] Project content lives in `app/projects-data.ts`, not route files

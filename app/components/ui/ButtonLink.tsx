@@ -1,8 +1,8 @@
 'use client';
 
 import Image from 'next/image';
-import Link from 'next/link';
 import { motion } from 'framer-motion';
+import TransitionLink from './TransitionLink';
 import { type MouseEventHandler, type ReactNode, useState } from 'react';
 
 type ButtonLinkProps = {
@@ -129,8 +129,8 @@ export default function ButtonLink({
   }
 
   return (
-    <Link href={href} title={title} aria-label={ariaLabel} className={sharedClassName} onClick={onClick} {...interactionProps}>
+    <TransitionLink href={href} title={title} aria-label={ariaLabel} className={sharedClassName} onClick={onClick} {...interactionProps}>
       {content}
-    </Link>
+    </TransitionLink>
   );
 }

@@ -71,6 +71,59 @@ body {
   }
 }
 
+/* Page transitions. Navigations run through `document.startViewTransition`
+   (see useViewTransitionNavigate), which cross-fades the two pages by default;
+   these rules give that swap a direction and slow the shared project media
+   enough to read as one continuous image. Browsers without the API cut
+   straight to the new page, exactly as before. */
+
+/* Naming the fixed nav lifts it out of the page snapshot, so it stays put
+   instead of drifting with everything underneath it. */
+.site-nav {
+  view-transition-name: site-nav;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  ::view-transition-old(root) {
+    animation: page-exit 240ms cubic-bezier(0.4, 0, 1, 1) both;
+  }
+
+  ::view-transition-new(root) {
+    animation: page-enter 460ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  /* The frame morphing from a project card into the page hero. */
+  ::view-transition-group(shared-project-media) {
+    animation-duration: 560ms;
+    animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  /* Card and hero crop the same photo with `object-cover` at different aspect
+     ratios, so the snapshots crop too — the default would stretch them as the
+     box changes shape. Both carry the same image, which is what lets the
+     cross-fade between them pass for a single element resizing. */
+  ::view-transition-old(shared-project-media),
+  ::view-transition-new(shared-project-media) {
+    height: 100%;
+    object-fit: cover;
+    animation-duration: 560ms;
+    animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  }
+}
+
+@keyframes page-exit {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes page-enter {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+}
+
 @media (hover: hover) and (pointer: fine) {
   * {
     cursor: none;

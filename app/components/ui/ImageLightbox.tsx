@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import { AnimatePresence, motion } from 'framer-motion';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 
 export type LightboxImage = {
@@ -32,8 +32,39 @@ const SCROLL_KEYS = [' ', 'ArrowUp', 'ArrowDown', 'PageUp', 'PageDown', 'Home', 
 const controlClassName =
   'flex h-11 w-11 items-center justify-center rounded-full bg-white/[0.08] text-white transition-colors hover:bg-white/[0.16] disabled:opacity-40';
 
+/**
+ * `object-contain` letterboxes the photo inside its box, so the element covers
+ * more of the screen than the viewer can see. This works out the rectangle that
+ * is actually painted, letting clicks in the empty margin close the lightbox.
+ */
+const isPointOnPaintedImage = (image: HTMLImageElement, clientX: number, clientY: number) => {
+  const { naturalWidth, naturalHeight } = image;
+
+  // Nothing decoded yet — treat the whole box as the image rather than closing.
+  if (naturalWidth === 0 || naturalHeight === 0) {
+    return true;
+  }
+
+  const box = image.getBoundingClientRect();
+  const scale = Math.min(box.width / naturalWidth, box.height / naturalHeight);
+  const paintedWidth = naturalWidth * scale;
+  const paintedHeight = naturalHeight * scale;
+  const left = box.left + (box.width - paintedWidth) / 2;
+  const top = box.top + (box.height - paintedHeight) / 2;
+
+  return (
+    clientX >= left &&
+    clientX <= left + paintedWidth &&
+    clientY >= top &&
+    clientY <= top + paintedHeight
+  );
+};
+
 export default function ImageLightbox({ images, activeIndex, onClose, onNavigate }: ImageLightboxProps) {
   const [isMounted, setIsMounted] = useState(false);
+  const imageRef = useRef<HTMLImageElement>(null);
+  /** A swipe that lands in the margin must not be mistaken for a click-away. */
+  const hasDraggedRef = useRef(false);
 
   useEffect(() => {
     setIsMounted(true);
@@ -154,6 +185,12 @@ export default function ImageLightbox({ images, activeIndex, onClose, onNavigate
                 drag={hasMultiple ? 'x' : false}
                 dragConstraints={{ left: 0, right: 0 }}
                 dragElastic={0.18}
+                onPointerDownCapture={() => {
+                  hasDraggedRef.current = false;
+                }}
+                onDragStart={() => {
+                  hasDraggedRef.current = true;
+                }}
                 onDragEnd={(_event, info) => {
                   if (info.offset.x <= -SWIPE_THRESHOLD) {
                     goTo(1);
@@ -164,9 +201,20 @@ export default function ImageLightbox({ images, activeIndex, onClose, onNavigate
                     goTo(-1);
                   }
                 }}
-                onClick={(event) => event.stopPropagation()}
+                onClick={(event) => {
+                  // Everything else in the overlay bubbles up to `onClose`, so
+                  // only clicks on the photo itself are held back.
+                  const isOnImage =
+                    imageRef.current !== null &&
+                    isPointOnPaintedImage(imageRef.current, event.clientX, event.clientY);
+
+                  if (isOnImage || hasDraggedRef.current) {
+                    event.stopPropagation();
+                  }
+                }}
               >
                 <Image
+                  ref={imageRef}
                   src={activeImage.src}
                   alt={activeImage.alt}
                   fill

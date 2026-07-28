@@ -27,13 +27,14 @@ npm run lint     # eslint (next/core-web-vitals)
 
 ```
 app/
-  (site)/                     # public marketing site (custom cursor, footer, smooth scroll)
+  (site)/                     # public marketing site (cursor, page transitions, footer, smooth scroll)
     page.tsx                  # landing page sections
     [projectSlug]/            # /<slug> — project pages generated from projects-data.ts
   admin/                      # password-gated dashboard (own layout, no marketing chrome)
   api/admin/                  # login / logout route handlers (cookie session)
   components/                 # shared components incl. ShaderGradient, ProjectPageLayout
-  hooks/                      # useShaderSettings, useScrollColor
+    ui/                       # reusable primitives — TransitionLink, ButtonLink, ImageLightbox…
+  hooks/                      # useShaderSettings, useScrollColor, useViewTransitionNavigate
   projects-data.ts            # single source of truth for project content
   team-data.ts                # committed seed for the team roster
 middleware.ts                 # gates everything under /admin
@@ -65,6 +66,36 @@ spectral), colour-mode and custom-colour pickers, and per-control reset. Edits
 Use **Copy JSON** / **Import** to move a configuration between machines, or **Reset
 all** to return to defaults. To make the panel always visible, render `ShaderEditor`
 unconditionally instead of gating on the shortcut/URL.
+
+## Motion and navigation
+
+Internal links go through `app/components/ui/TransitionLink.tsx`, a drop-in `next/link`
+that runs the App Router navigation inside the browser's View Transitions API (see
+`app/hooks/useViewTransitionNavigate.ts`). Pages cross-fade with a slight rise, and the
+fixed nav is named `site-nav` so it holds still while everything beneath it changes.
+Browsers without the API — and visitors who ask for reduced motion — get a plain
+navigation; external hosts, new-tab clicks, and same-page hashes fall through to
+`next/link` untouched.
+
+**Shared-element morph.** A project's card grows into the hero image on its project page.
+Both frames carry `data-shared-media="<slug>"`; on click the hook hands a
+`view-transition-name` to the clicked card, passes it to the destination hero once the new
+page commits, and clears it when the transition ends — a duplicate name anywhere in the
+document makes the browser drop the whole transition. Timing lives in the
+`::view-transition-*` rules in `app/globals.css`. The project hero deliberately has no
+entry animation: arriving mid-morph, fading it in would leave a hole where the image
+should be.
+
+**Scroll.** Lenis keeps its own scroll position, so anything that moves the page tells
+`SmoothScrollProvider` through window events instead of reaching for the instance:
+`lenis-stop` / `lenis-start` (the lightbox freezes the page behind it),
+`lenis-scroll-top` (the back-to-top button), and `lenis-scroll-reset`, which navigations
+fire so Lenis cannot drive the window back to the previous page's offset.
+
+**Cursor.** `CustomCursor` draws the site's own cursor and `globals.css` hides the native
+one. Both are gated on `(hover: hover) and (pointer: fine)` rather than a viewport width:
+a narrow desktop window keeps the cursor, a touch device never gets it, and plugging a
+mouse into a tablet brings it to life without a reload.
 
 ## Project pages
 
@@ -105,5 +136,4 @@ file or database is the next step for making edits go live.
 Coding conventions and design-system rules (TypeScript strictness, British spelling,
 no decorative borders/shadows, CSS-variable colours, etc.) are documented in
 [CLAUDE.md](CLAUDE.md). In short: reuse `app/components/ui/` primitives before adding
-one-off markup, keep project content in `app/projects-data.ts`, and preserve slug and
-image-naming conventions to avoid broken links.
+one-off markup.

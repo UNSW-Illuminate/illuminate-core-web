@@ -1,7 +1,6 @@
 'use client';
 
 import Image from 'next/image';
-import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { useState } from 'react';
 import OtherProjects from './OtherProjects';
@@ -11,6 +10,7 @@ import ContentContainer from './ui/ContentContainer';
 import ImageLightbox from './ui/ImageLightbox';
 import SectionHeading from './ui/SectionHeading';
 import SectionLabel from './ui/SectionLabel';
+import TransitionLink from './ui/TransitionLink';
 
 type ProjectImage = {
   src: string;
@@ -55,8 +55,14 @@ const enterSoft = {
 /** Images per gallery block: one full-width image followed by a pair. */
 const GALLERY_GROUP_SIZE = 3;
 
-/** Shared affordance for every image that opens the lightbox. */
-const enlargeableImageClassName = 'block w-full overflow-hidden transition-opacity hover:opacity-80';
+/**
+ * Shared affordance for every image that opens the lightbox. Closing the
+ * lightbox returns focus to the image that opened it, and the browser's default
+ * focus ring reads as a stray selection rectangle around the photo — so the
+ * outline is dropped in favour of the same opacity feedback used on hover.
+ */
+const enlargeableImageClassName =
+  'block w-full overflow-hidden transition-opacity hover:opacity-80 focus:outline-none focus-visible:opacity-80';
 
 export default function ProjectPageLayout({
   currentSlug,
@@ -95,13 +101,13 @@ export default function ProjectPageLayout({
           transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
           className="mb-12 flex flex-wrap items-center justify-between gap-4"
         >
-          <Link
+          <TransitionLink
             href="/"
             aria-label="Return to home"
             className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-white/[0.05] text-lg text-white/85 transition-colors hover:bg-white/[0.1]"
           >
             <span aria-hidden="true">&times;</span>
-          </Link>
+          </TransitionLink>
 
           <div className="flex flex-wrap items-center justify-end gap-3">
             {previousProject && previousProject.href !== `/${currentSlug}` ? (
@@ -157,12 +163,18 @@ export default function ProjectPageLayout({
             </div>
           </motion.aside>
 
-          <motion.article className="md:col-span-3" initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.75, delay: 0.24, ease: [0.22, 1, 0.36, 1] }}>
+          <article className="md:col-span-3">
+            {/* The hero deliberately has no entry animation: arriving from a
+                project card it is mid-morph (see useViewTransitionNavigate),
+                and fading it in would leave a hole where the image should be.
+                It is also the largest paint on the page, so it earns its keep
+                by showing immediately. */}
             {heroImage && (
               <button
                 type="button"
                 aria-label={`Enlarge ${heroImage.alt}`}
                 className={enlargeableImageClassName}
+                data-shared-media={currentSlug}
                 onClick={() => setActiveImageIndex(heroIndex === -1 ? 0 : heroIndex)}
               >
                 <Image
@@ -176,15 +188,17 @@ export default function ProjectPageLayout({
               </button>
             )}
 
-            <div className="mt-6 flex flex-wrap items-center gap-6 text-base text-white">
-              <p>{location}</p>
-              <p>{dates}</p>
-            </div>
+            <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.75, delay: 0.24, ease: [0.22, 1, 0.36, 1] }}>
+              <div className="mt-6 flex flex-wrap items-center gap-6 text-base text-white">
+                <p>{location}</p>
+                <p>{dates}</p>
+              </div>
 
-            <div className="mt-8 max-w-4xl text-4xl text-white/90">
-              <p className="whitespace-pre-line">{description}</p>
-            </div>
-          </motion.article>
+              <div className="mt-8 max-w-4xl text-4xl text-white/90">
+                <p className="whitespace-pre-line">{description}</p>
+              </div>
+            </motion.div>
+          </article>
         </div>
       </ContentContainer>
 

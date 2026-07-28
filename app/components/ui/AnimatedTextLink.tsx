@@ -1,7 +1,7 @@
 'use client';
 
-import Link from 'next/link';
 import { motion } from 'framer-motion';
+import TransitionLink from './TransitionLink';
 import { type ReactNode, useState } from 'react';
 
 type AnimatedTextLinkProps = {
@@ -69,8 +69,8 @@ export default function AnimatedTextLink({
   }
 
   return (
-    <Link href={href} title={title} aria-label={ariaLabel} className={sharedClassName} {...interactionProps}>
+    <TransitionLink href={href} title={title} aria-label={ariaLabel} className={sharedClassName} {...interactionProps}>
       {content}
-    </Link>
+    </TransitionLink>
   );
 }
