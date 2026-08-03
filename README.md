@@ -1,9 +1,7 @@
 # Illuminate
 
 The website for **UNSW Illuminate** — a student showcase of interactive light and
-art installations. The landing page renders a full-screen WebGL gradient that reacts
-to the cursor and scroll position; individual installations live on data-driven
-project pages.
+art installations. 
 
 ## Tech stack
 
