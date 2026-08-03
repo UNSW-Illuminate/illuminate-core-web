@@ -1,24 +1,39 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { ShaderSettings } from '@/app/hooks/useShaderSettings';
 import { FRAGMENT_SHADER_SOURCE, VERTEX_SHADER_SOURCE } from './shader-source';
+
+const SHADER_SETTINGS = {
+  animationSpeed: 0.1,
+  grainIntensity: 0.05,
+  circleRadius: 200,
+  trailDrag: 0.04,
+  rippleIntensity: 0.4,
+  spectralHueShift: -120,
+  spectralScale: 15,
+  spectralTimeShift: 47,
+  spectralSaturation: 0.9,
+} as const;
+
+const FALLBACK_COLORS = {
+  first: [0, 0, 0],
+  second: [1, 0, 0.8],
+  third: [1, 0, 0],
+} as const;
 
 /**
  * Full-screen WebGL 2 gradient that paints behind the whole site.
  *
- * The effect builds the shader program once per `settings` change, then runs a
+ * The effect builds the shader program once, then runs a
  * requestAnimationFrame loop that pushes uniforms (time, mouse trail, scroll
  * offset, colours) each frame. If WebGL 2 is unavailable or the program fails to
  * build, it falls back to a static CSS gradient so the page is never blank.
  */
 export default function ShaderGradient({
-  settings, 
   scrollColor,
   scrollColorRgb,
   scrollProgress = 0,
 }: { 
-  settings: ShaderSettings;
   scrollColor?: { hue: number; saturation: number; lightness: number };
   scrollColorRgb?: [number, number, number];
   scrollProgress?: number;
@@ -35,14 +50,6 @@ export default function ShaderGradient({
   // Set when WebGL 2 is unavailable or the program fails to build, so we can
   // render a static gradient fallback instead of a blank canvas.
   const [renderFailed, setRenderFailed] = useState(false);
-
-  // Live settings reach the render loop through a ref: the WebGL program is
-  // expensive to compile, so a slider drag must not tear down and rebuild it.
-  const settingsRef = useRef(settings);
-
-  useEffect(() => {
-    settingsRef.current = settings;
-  }, [settings]);
 
   useEffect(() => {
     scrollColorRef.current = scrollColor;
@@ -171,16 +178,6 @@ export default function ShaderGradient({
     let startTime = Date.now();
     let elapsedBeforeHidden = 0;
 
-    // Helper function to convert hex to RGB
-    const hexToRgb = (hex: string): [number, number, number] => {
-      const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-      return result ? [
-        parseInt(result[1], 16) / 255,
-        parseInt(result[2], 16) / 255,
-        parseInt(result[3], 16) / 255
-      ] as [number, number, number] : [1, 0, 0];
-    };
-
     // Helper function to convert HSL to RGB normalized
     const hslToRgbNormalized = (h: number, s: number, l: number): [number, number, number] => {
       s /= 100;
@@ -197,7 +194,7 @@ export default function ShaderGradient({
     let animationFrameId = 0;
 
     const animate = () => {
-      const liveSettings = settingsRef.current;
+      const liveSettings = SHADER_SETTINGS;
       const elapsed = (Date.now() - startTime) / 1000;
 
       // Increase drag significantly - slower smoothing
@@ -224,7 +221,7 @@ export default function ShaderGradient({
       gl.uniform1f(uGrainIntensityLocation, effectiveGrainIntensity);
       gl.uniform1f(uCircleRadiusLocation, liveSettings.circleRadius);
       gl.uniform1f(uRippleIntensityLocation, liveSettings.rippleIntensity);
-      gl.uniform1i(uColorModeLocation, liveSettings.colorMode === 'spectral' ? 0 : 1);
+      gl.uniform1i(uColorModeLocation, 0);
       gl.uniform1f(uVerticalScrollOffsetLocation, verticalScrollOffset);
 
       // In spectral mode, derive palette from scroll color.
@@ -243,7 +240,7 @@ export default function ShaderGradient({
       gl.uniform1f(uSpectralTimeShiftLocation, liveSettings.spectralTimeShift);
       gl.uniform1f(uSpectralSaturationLocation, liveSettings.spectralSaturation);
 
-      if (liveSettings.colorMode === 'spectral' && activeScrollColorRgb && activeScrollColor) {
+      if (activeScrollColorRgb && activeScrollColor) {
         // Generate complementary colors from scroll color hue
         const baseHue = activeScrollColor.hue;
         const sat = activeScrollColor.saturation;
@@ -262,9 +259,9 @@ export default function ShaderGradient({
           Math.min(light + 10, 80)
         );
       } else {
-        col1 = hexToRgb(liveSettings.customColor1);
-        col2 = hexToRgb(liveSettings.customColor2);
-        col3 = hexToRgb(liveSettings.customColor3);
+        col1 = [...FALLBACK_COLORS.first];
+        col2 = [...FALLBACK_COLORS.second];
+        col3 = [...FALLBACK_COLORS.third];
       }
 
       gl.uniform3f(uColor1Location, col1[0], col1[1], col1[2]);
@@ -320,8 +317,8 @@ export default function ShaderGradient({
       gl.deleteShader(fragmentShader);
       gl.deleteBuffer(positionBuffer);
     };
-    // Set up once: settings reach the loop through settingsRef, so this effect
-    // must not re-run (and recompile the program) when they change.
+    // Set up once: all changing inputs reach the loop through refs, so this
+    // effect must not re-run and recompile the program.
   }, []);
 
   return (

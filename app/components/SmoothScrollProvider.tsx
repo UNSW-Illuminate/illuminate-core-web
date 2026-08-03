@@ -43,18 +43,20 @@ export function SmoothScrollProvider({ children }: { children: React.ReactNode }
     };
 
     // Animation loop for Lenis
+    let animationFrameId = 0;
     function raf(time: number) {
       lenis.raf(time);
-      requestAnimationFrame(raf);
+      animationFrameId = requestAnimationFrame(raf);
     }
 
     window.addEventListener('lenis-scroll-top', handleScrollToTop);
     window.addEventListener('lenis-scroll-reset', handleScrollReset);
     window.addEventListener('lenis-stop', handleStop);
     window.addEventListener('lenis-start', handleStart);
-    requestAnimationFrame(raf);
+    animationFrameId = requestAnimationFrame(raf);
 
     return () => {
+      cancelAnimationFrame(animationFrameId);
       window.removeEventListener('lenis-scroll-top', handleScrollToTop);
       window.removeEventListener('lenis-scroll-reset', handleScrollReset);
       window.removeEventListener('lenis-stop', handleStop);

@@ -6,11 +6,31 @@ import ContentContainer from '@/app/components/ui/ContentContainer';
 import RevealOnScroll from '@/app/components/ui/RevealOnScroll';
 import SectionHeading from '@/app/components/ui/SectionHeading';
 import SectionLabel from '@/app/components/ui/SectionLabel';
+import { DEFAULT_SOCIAL_IMAGE, PUBLIC_ROBOTS, SITE_NAME } from '@/app/site-config';
 import { portfolios } from '@/app/team-data';
 
 export const metadata: Metadata = {
-  title: 'Contact — UNSW Illuminate',
+  title: 'Contact and join',
   description: 'How to join UNSW Illuminate as a member, how to sponsor a build, and how to reach us.',
+  robots: PUBLIC_ROBOTS,
+  alternates: {
+    canonical: '/contact',
+  },
+  openGraph: {
+    type: 'website',
+    locale: 'en_AU',
+    url: '/contact',
+    siteName: SITE_NAME,
+    title: 'Contact and join UNSW Illuminate',
+    description:
+      'Join the student team, sponsor an interactive installation, or get in touch with UNSW Illuminate.',
+    images: [
+      {
+        url: DEFAULT_SOCIAL_IMAGE,
+        alt: 'An interactive light installation by UNSW Illuminate',
+      },
+    ],
+  },
 };
 
 const CONTACT_EMAIL = 'admin@unswilluminate.com';

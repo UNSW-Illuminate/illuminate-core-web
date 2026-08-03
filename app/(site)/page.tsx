@@ -1,9 +1,41 @@
+import type { Metadata } from 'next';
 import InteractiveGradient from '@/app/components/InteractiveGradient';
 import CenterTitle from '@/app/components/CenterTitle';
 import ProjectShowcase from '@/app/components/ProjectShowcase';
 import ContentContainer from '@/app/components/ui/ContentContainer';
 import SectionLabel from '@/app/components/ui/SectionLabel';
 import { projectPages } from '@/app/projects-data';
+import {
+  DEFAULT_SOCIAL_IMAGE,
+  PUBLIC_ROBOTS,
+  SITE_DESCRIPTION,
+  SITE_NAME,
+} from '@/app/site-config';
+
+export const metadata: Metadata = {
+  title: {
+    absolute: 'UNSW Illuminate — Interactive light installations',
+  },
+  description: SITE_DESCRIPTION,
+  robots: PUBLIC_ROBOTS,
+  alternates: {
+    canonical: '/',
+  },
+  openGraph: {
+    type: 'website',
+    locale: 'en_AU',
+    url: '/',
+    siteName: SITE_NAME,
+    title: 'Interactive light installations by UNSW students',
+    description: SITE_DESCRIPTION,
+    images: [
+      {
+        url: DEFAULT_SOCIAL_IMAGE,
+        alt: 'An interactive light installation by UNSW Illuminate',
+      },
+    ],
+  },
+};
 
 export default function Home() {
   const showcaseProjects = projectPages.map((project) => ({

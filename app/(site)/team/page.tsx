@@ -6,12 +6,32 @@ import ContentContainer from '@/app/components/ui/ContentContainer';
 import RevealOnScroll from '@/app/components/ui/RevealOnScroll';
 import SectionHeading from '@/app/components/ui/SectionHeading';
 import SectionLabel from '@/app/components/ui/SectionLabel';
+import { DEFAULT_SOCIAL_IMAGE, PUBLIC_ROBOTS, SITE_NAME } from '@/app/site-config';
 import { portfolios, teamSeed } from '@/app/team-data';
 
 export const metadata: Metadata = {
-  title: 'The team — UNSW Illuminate',
+  title: 'The team',
   description:
     'The students behind UNSW Illuminate: project leads, technical leads, and the art & design, mechanical, electrical, and software portfolios that build each installation.',
+  robots: PUBLIC_ROBOTS,
+  alternates: {
+    canonical: '/team',
+  },
+  openGraph: {
+    type: 'website',
+    locale: 'en_AU',
+    url: '/team',
+    siteName: SITE_NAME,
+    title: 'The team behind UNSW Illuminate',
+    description:
+      'Meet the UNSW students who design, engineer, and build our interactive light installations.',
+    images: [
+      {
+        url: DEFAULT_SOCIAL_IMAGE,
+        alt: 'An interactive light installation by UNSW Illuminate',
+      },
+    ],
+  },
 };
 
 export default function TeamPage() {
