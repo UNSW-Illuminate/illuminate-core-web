@@ -102,6 +102,7 @@ export const teamSeed: TeamMember[] = [
     name: 'Jacky Peng',
     role: 'Mechanical Lead',
     group: 'technical',
+    photo: '/team/jacky-peng.png',
   },
   {
     id: 'justin-prasad',
