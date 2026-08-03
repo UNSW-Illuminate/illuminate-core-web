@@ -106,6 +106,49 @@ export default function ProjectPageLayout({
   return (
     <main id="project-top" className="min-h-screen  text-white px-6 pb-16 pt-28 md:px-12 md:pt-32 lg:px-20">
       <ContentContainer>
+        {(adjacentPrevious || adjacentNext) && (
+          <motion.div
+            initial={{ opacity: 0, y: -18 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+            className="mb-12 hidden items-center justify-end gap-3 md:flex"
+          >
+            {adjacentPrevious ? (
+              <div className="min-w-[168px]">
+                <ButtonLink
+                  href={adjacentPrevious.href}
+                  ariaLabel={`Go to previous project: ${adjacentPrevious.title}`}
+                  title={adjacentPrevious.title}
+                  variant="arrow"
+                  size="small"
+                  arrowPlacement="left"
+                  className="bg-white/[0.05] hover:bg-white/[0.1]"
+                  arrowClassName="bg-white/[0.08]"
+                  arrowIconClassName="rotate-180"
+                >
+                  <span className="text-sm text-white">Previous</span>
+                </ButtonLink>
+              </div>
+            ) : null}
+
+            {adjacentNext ? (
+              <div className="min-w-[152px]">
+                <ButtonLink
+                  href={adjacentNext.href}
+                  ariaLabel={`Go to next project: ${adjacentNext.title}`}
+                  title={adjacentNext.title}
+                  variant="arrow"
+                  size="small"
+                  className="bg-white/[0.05] hover:bg-white/[0.1]"
+                  arrowClassName="bg-white/[0.08]"
+                >
+                  <span className="text-sm text-white">Next</span>
+                </ButtonLink>
+              </div>
+            ) : null}
+          </motion.div>
+        )}
+
         <div className="grid gap-x-10 gap-y-4 md:grid-cols-4 md:gap-x-12 md:gap-y-8 lg:gap-x-16">
           <motion.aside className="order-2 md:order-none md:col-span-1" initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.08, ease: [0.22, 1, 0.36, 1] }}>
             <div>
@@ -222,9 +265,10 @@ export default function ProjectPageLayout({
 
       <OtherProjects projects={allProjects} currentSlug={currentSlug} />
 
-      {/* App-style controls that hover over the page in the bottom-right corner,
-          so moving between projects never means scrolling back to the top. They
-          sit over photography, hence the tinted, blurred trays. */}
+      {/* Mobile project navigation stays within thumb reach. Desktop keeps the
+          same controls in the top row, while its scroll-up shortcut remains in
+          the lower corner. The floating trays sit over photography, hence the
+          tint and blur. */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -250,7 +294,9 @@ export default function ProjectPageLayout({
         </div>
 
         {(adjacentPrevious || adjacentNext) && (
-          <div className={`pointer-events-auto flex items-center gap-1 ${floatingTrayClassName}`}>
+          <div
+            className={`pointer-events-auto flex items-center gap-1 md:hidden ${floatingTrayClassName}`}
+          >
             {adjacentPrevious ? (
               <div>
                 <ButtonLink

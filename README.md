@@ -19,6 +19,8 @@ npm run dev      # start the dev server on http://localhost:3000
 npm run build    # production build
 npm start        # serve the production build
 npm run lint     # eslint (next/core-web-vitals)
+npm run typecheck # TypeScript without emitting files
+npm run audit:dependencies # fail on high-severity dependency vulnerabilities
 ```
 
 ## Project structure
@@ -33,6 +35,11 @@ app/
   hooks/                      # useScrollColor, useViewTransitionNavigate
   projects-data.ts            # single source of truth for project content
   team-data.ts                # committed seed for the team roster
+  site-config.ts              # canonical origin, site metadata, social profiles
+  robots.ts                   # environment-aware crawler policy
+  sitemap.ts                  # generated public route index
+public/.well-known/
+  security.txt                # security contact and disclosure policy
 ```
 
 Routing note: project pages live at the root, `/<slug>`.
@@ -91,12 +98,29 @@ Project pages are data-driven from `projectPageSeeds` in `app/projects-data.ts`.
 The route, gallery, and prev/next navigation are generated automatically — no routing
 changes needed.
 
+Project and team content is maintained directly in the typed data files above. The
+production application intentionally has no `/admin` dashboard, authentication API,
+or browser-based shader editor. Shader tuning values live beside the renderer in
+`app/components/ShaderGradient.tsx`.
+
 ## Deployment and search visibility
 
 Copy `.env.example` into the deployment platform's environment-variable store;
 never commit a populated `.env` file. `SITE_URL` is the canonical production origin
 used by metadata, structured data, `robots.txt`, and `sitemap.xml`. Set
 `SITE_NOINDEX=true` on previews or mirrors that must not appear in search results.
+
+Before deploying production:
+
+1. Set `SITE_URL` during the build to the final HTTPS origin, without a trailing slash.
+2. Leave `SITE_NOINDEX` unset or set it to `false` only on the canonical deployment.
+3. Run `npm run lint`, `npm run typecheck`, `npm run build`, and
+   `npm run audit:dependencies`.
+4. Confirm `/robots.txt`, `/sitemap.xml`, and `/.well-known/security.txt` are reachable.
+
+Security headers and long-lived immutable asset caching are configured in
+`next.config.js`; `.vercelignore` excludes local documentation and development-only
+files from deployment uploads.
 
 ## Conventions
 
