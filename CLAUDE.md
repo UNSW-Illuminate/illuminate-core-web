@@ -21,10 +21,9 @@ Interactive website for UNSW Illuminate: a full-screen WebGL shader background, 
 - `app/page.tsx` — landing page sections
 - `app/layout.tsx` — root layout + metadata
 - `app/(site)/[projectSlug]/page.tsx` — dynamic project route (`generateStaticParams`)
-- `app/admin/` — password-gated dark admin UI for project CRUD
 - `app/projects-data.ts` — single source of truth for project content
 - `app/components/` — feature components; `app/components/ui/` — reusable primitives
-- `app/hooks/` — shared hooks (`useShaderSettings`, `useScrollColor`, `useViewTransitionNavigate`)
+- `app/hooks/` — shared hooks (`useScrollColor`, `useViewTransitionNavigate`)
 - `app/globals.css` — fonts, brand colour variable, base styles, cursor behaviour, view-transition rules
 
 ## Coding Conventions
@@ -73,7 +72,7 @@ switch (mode.kind) {
 ### File Naming
 
 - **Components**: PascalCase — `ButtonLink.tsx`
-- **Hooks**: camelCase, `use` prefix — `useShaderSettings.ts`
+- **Hooks**: camelCase, `use` prefix — `useScrollColor.ts`
 - **Utilities**: camelCase — `formatDate.ts`
 - **Constants**: UPPER_SNAKE_CASE
 - **Types**: PascalCase

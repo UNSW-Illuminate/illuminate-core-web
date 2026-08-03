@@ -1,9 +1,7 @@
 /**
  * team-data.ts
  *
- * Committed source of truth for the Illuminate team. The /admin tool hydrates
- * from this seed and stores local edits (including uploaded photos as data URLs)
- * in the browser under 'illuminate-admin-team'.
+ * Committed source of truth for the Illuminate team.
  *
  * Photos live in public/team/ and are referenced by path. A member without a
  * photo renders as an initials tile, so the roster never waits on a headshot.
@@ -17,7 +15,7 @@ export type TeamMember = {
   name: string;
   role: string;
   group: TeamGroup;
-  /** A /public path (e.g. /team/jane.webp) or an uploaded data URL. */
+  /** A /public path, for example /team/jane.webp. */
   photo?: string;
 };
 

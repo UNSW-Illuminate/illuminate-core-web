@@ -10,7 +10,6 @@ import ContentContainer from './ui/ContentContainer';
 import ImageLightbox from './ui/ImageLightbox';
 import SectionHeading from './ui/SectionHeading';
 import SectionLabel from './ui/SectionLabel';
-import TransitionLink from './ui/TransitionLink';
 
 type ProjectImage = {
   src: string;
@@ -64,6 +63,13 @@ const GALLERY_GROUP_SIZE = 3;
 const enlargeableImageClassName =
   'block w-full overflow-hidden transition-opacity hover:opacity-80 focus:outline-none focus-visible:opacity-80';
 
+/**
+ * The corner controls float above whatever is scrolling past — often a
+ * full-bleed photograph — so each tray carries its own tint and blur to stay
+ * readable rather than relying on the page background.
+ */
+const floatingTrayClassName = 'rounded-full bg-black/50 p-1 backdrop-blur-md';
+
 export default function ProjectPageLayout({
   currentSlug,
   title,
@@ -92,78 +98,32 @@ export default function ProjectPageLayout({
 
   const heroIndex = galleryImages.findIndex((image) => image.src === heroImage?.src);
 
+  // A single-project site would otherwise link a project to itself.
+  const adjacentPrevious =
+    previousProject && previousProject.href !== `/${currentSlug}` ? previousProject : undefined;
+  const adjacentNext = nextProject && nextProject.href !== `/${currentSlug}` ? nextProject : undefined;
+
   return (
     <main id="project-top" className="min-h-screen  text-white px-6 pb-16 pt-28 md:px-12 md:pt-32 lg:px-20">
       <ContentContainer>
-        <motion.div
-          initial={{ opacity: 0, y: -18 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
-          className="mb-12 flex flex-wrap items-center justify-between gap-4"
-        >
-          <TransitionLink
-            href="/"
-            aria-label="Return to home"
-            className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-white/[0.05] text-lg text-white/85 transition-colors hover:bg-white/[0.1]"
-          >
-            <span aria-hidden="true">&times;</span>
-          </TransitionLink>
-
-          <div className="flex flex-wrap items-center justify-end gap-3">
-            {previousProject && previousProject.href !== `/${currentSlug}` ? (
-              <div className="w-full sm:w-auto sm:min-w-[168px]">
-                <ButtonLink
-                  href={previousProject.href}
-                  ariaLabel={`Go to previous project: ${previousProject.title}`}
-                  title={previousProject.title}
-                  variant="arrow"
-                  size="small"
-                  arrowPlacement="left"
-                  className="bg-white/[0.05] hover:bg-white/[0.1]"
-                  arrowClassName="bg-white/[0.08]"
-                  arrowIconClassName="rotate-180"
-                >
-                  <span className="text-sm text-white">Previous</span>
-                </ButtonLink>
-              </div>
-            ) : null}
-
-            {nextProject && nextProject.href !== `/${currentSlug}` ? (
-              <div className="w-full sm:w-auto sm:min-w-[152px]">
-                <ButtonLink
-                  href={nextProject.href}
-                  ariaLabel={`Go to next project: ${nextProject.title}`}
-                  title={nextProject.title}
-                  variant="arrow"
-                  size="small"
-                  className="bg-white/[0.05] hover:bg-white/[0.1]"
-                  arrowClassName="bg-white/[0.08]"
-                >
-                  <span className="text-sm text-white">Next</span>
-                </ButtonLink>
-              </div>
-            ) : null}
-          </div>
-        </motion.div>
-
-        <div className="grid gap-x-10 gap-y-8 md:grid-cols-4 md:gap-x-12 lg:gap-x-16">
-          <motion.aside className="md:col-span-1" initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.08, ease: [0.22, 1, 0.36, 1] }}>
+        <div className="grid gap-x-10 gap-y-4 md:grid-cols-4 md:gap-x-12 md:gap-y-8 lg:gap-x-16">
+          <motion.aside className="order-2 md:order-none md:col-span-1" initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.08, ease: [0.22, 1, 0.36, 1] }}>
             <div>
-              <SectionLabel className="mt-3 text-lg text-white/95">{projectType}</SectionLabel>
+              <SectionLabel className="text-lg text-white/95 md:mt-3">{projectType}</SectionLabel>
             </div>
           </motion.aside>
 
-          <motion.article className="md:col-span-3" initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.12, ease: [0.22, 1, 0.36, 1] }}>
+          <motion.article className="order-3 md:order-none md:col-span-3" initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.12, ease: [0.22, 1, 0.36, 1] }}>
             <SectionHeading as="h1" className="text-6xl md:text-8xl">{title}</SectionHeading>
           </motion.article>
 
-          <motion.aside className="md:col-span-1" initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.18, ease: [0.22, 1, 0.36, 1] }}>
+          <motion.aside className="order-4 md:order-none md:col-span-1" initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.18, ease: [0.22, 1, 0.36, 1] }}>
             <div>
-              <p className="mt-3 text-base leading-relaxed text-white/80">{shortDescription}</p>
+              <p className="text-base leading-relaxed text-white/80 md:mt-3">{shortDescription}</p>
             </div>
           </motion.aside>
 
-          <article className="md:col-span-3">
+          <article className="contents md:col-span-3 md:block">
             {/* The hero deliberately has no entry animation: arriving from a
                 project card it is mid-morph (see useViewTransitionNavigate),
                 and fading it in would leave a hole where the image should be.
@@ -173,7 +133,7 @@ export default function ProjectPageLayout({
               <button
                 type="button"
                 aria-label={`Enlarge ${heroImage.alt}`}
-                className={enlargeableImageClassName}
+                className={`${enlargeableImageClassName} order-1 md:order-none`}
                 data-shared-media={currentSlug}
                 onClick={() => setActiveImageIndex(heroIndex === -1 ? 0 : heroIndex)}
               >
@@ -188,13 +148,13 @@ export default function ProjectPageLayout({
               </button>
             )}
 
-            <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.75, delay: 0.24, ease: [0.22, 1, 0.36, 1] }}>
-              <div className="mt-6 flex flex-wrap items-center gap-6 text-base text-white">
+            <motion.div className="order-5 md:order-none" initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.75, delay: 0.24, ease: [0.22, 1, 0.36, 1] }}>
+              <div className="flex flex-wrap items-center gap-3 text-base text-white md:mt-6 md:gap-6">
                 <p>{location}</p>
                 <p>{dates}</p>
               </div>
 
-              <div className="mt-8 max-w-4xl text-4xl text-white/90">
+              <div className="mt-5 max-w-4xl text-2xl text-white/90 md:mt-8 md:text-4xl">
                 <p className="whitespace-pre-line">{description}</p>
               </div>
             </motion.div>
@@ -262,22 +222,23 @@ export default function ProjectPageLayout({
 
       <OtherProjects projects={allProjects} currentSlug={currentSlug} />
 
+      {/* App-style controls that hover over the page in the bottom-right corner,
+          so moving between projects never means scrolling back to the top. They
+          sit over photography, hence the tinted, blurred trays. */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, amount: 0.2 }}
-        transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
-        className="pointer-events-none fixed bottom-6 right-6 z-20 hidden md:block"
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.55, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
+        className="pointer-events-none fixed bottom-6 right-6 z-20 flex flex-col items-end gap-2"
       >
-        <div className="pointer-events-auto w-[172px]">
+        <div className={`pointer-events-auto hidden w-[172px] md:block ${floatingTrayClassName}`}>
           <ButtonLink
             href="#project-top"
             ariaLabel="Scroll back to top"
             title="Scroll back to top"
             variant="arrow"
             size="small"
-            className="bg-white/[0.05] hover:bg-white/[0.1]"
-            arrowClassName="bg-white/[0.08]"
+            arrowClassName="bg-white/[0.12]"
             arrowIconClassName="-rotate-90"
             onClick={(event) => {
               event.preventDefault();
@@ -287,6 +248,42 @@ export default function ProjectPageLayout({
             <span className="text-sm text-white">Scroll Up</span>
           </ButtonLink>
         </div>
+
+        {(adjacentPrevious || adjacentNext) && (
+          <div className={`pointer-events-auto flex items-center gap-1 ${floatingTrayClassName}`}>
+            {adjacentPrevious ? (
+              <div>
+                <ButtonLink
+                  href={adjacentPrevious.href}
+                  ariaLabel={`Go to previous project: ${adjacentPrevious.title}`}
+                  title={adjacentPrevious.title}
+                  variant="arrow"
+                  size="extraSmall"
+                  arrowPlacement="left"
+                  arrowClassName="bg-white/[0.12]"
+                  arrowIconClassName="rotate-180"
+                >
+                  <span className="whitespace-nowrap pr-1 text-xs text-white sm:text-sm">Previous</span>
+                </ButtonLink>
+              </div>
+            ) : null}
+
+            {adjacentNext ? (
+              <div>
+                <ButtonLink
+                  href={adjacentNext.href}
+                  ariaLabel={`Go to next project: ${adjacentNext.title}`}
+                  title={adjacentNext.title}
+                  variant="arrow"
+                  size="extraSmall"
+                  arrowClassName="bg-white/[0.12]"
+                >
+                  <span className="whitespace-nowrap pl-1 text-xs text-white sm:text-sm">Next</span>
+                </ButtonLink>
+              </div>
+            ) : null}
+          </div>
+        )}
       </motion.div>
 
       <ImageLightbox

@@ -9,13 +9,8 @@ import path from 'node:path';
  * SHADER BACKGROUND
  * -----------------
  * The animated WebGL shader gradient that sits behind every page is
- * independent of this file. To tweak it, see:
- *   - app/components/ShaderGradient.tsx   – vertex/fragment shader source
- *   - app/hooks/useShaderSettings.ts      – runtime uniforms (speed, grain,
- *                                           colour mode, ripple, etc.)
- * Default shader values are defined in DEFAULT_SETTINGS inside
- * useShaderSettings.ts and are persisted to localStorage under the key
- * 'illuminate-settings'.
+ * independent of this file. Its fixed runtime values and rendering pipeline
+ * live in app/components/ShaderGradient.tsx.
  *
  * PROJECT PAGES
  * -------------
@@ -44,7 +39,7 @@ export type ProjectPageData = {
   galleryImages: ProjectImage[];
 };
 
-export type ProjectPageSeed = Omit<ProjectPageData, 'heroImage' | 'galleryImages'>;
+type ProjectPageSeed = Omit<ProjectPageData, 'heroImage' | 'galleryImages'>;
 
 /**
  * Derives heroImage and galleryImages from existing files in /public.
@@ -247,12 +242,6 @@ function parseProjectYear(dates: string) {
 const projectsByDate: ProjectPageSeed[] = [...projectPageSeeds].sort(
   (a, b) => parseProjectYear(b.dates) - parseProjectYear(a.dates),
 );
-
-/**
- * Editable project fields (no derived images), exposed for the /admin tool to
- * hydrate from the committed source of truth.
- */
-export const projectSeeds: ProjectPageSeed[] = projectsByDate;
 
 export const projectPages: ProjectPageData[] = projectsByDate.map((project) => ({
   ...project,

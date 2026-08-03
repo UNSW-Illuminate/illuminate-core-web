@@ -12,7 +12,7 @@ type ButtonLinkProps = {
   iconClassName?: string;
   arrowClassName?: string;
   arrowIconClassName?: string;
-  size?: 'small' | 'regular' | 'large' | 'extraLarge';
+  size?: 'extraSmall' | 'small' | 'regular' | 'large' | 'extraLarge';
   target?: string;
   rel?: string;
   title?: string;
@@ -28,29 +28,45 @@ function joinClasses(...values: Array<string | undefined>) {
 }
 
 const sizeStyles = {
+  extraSmall: {
+    button: 'px-2 py-1.5',
+    icon: 'h-8 w-8',
+    arrow: 'h-8 w-8',
+    gap: 'gap-2',
+    arrowSpacingLeft: 'mr-2',
+    arrowSpacingRight: 'ml-2',
+  },
   small: {
     button: 'px-3 py-2.5',
     icon: 'h-9 w-9',
     arrow: 'h-9 w-9',
     gap: 'gap-3',
+    arrowSpacingLeft: 'mr-4',
+    arrowSpacingRight: 'ml-4',
   },
   regular: {
     button: 'px-4 py-3',
     icon: 'h-10 w-10',
     arrow: 'h-10 w-10',
     gap: 'gap-3',
+    arrowSpacingLeft: 'mr-4',
+    arrowSpacingRight: 'ml-4',
   },
   large: {
     button: 'px-4 py-4',
     icon: 'h-12 w-12',
     arrow: 'h-12 w-12',
     gap: 'gap-4',
+    arrowSpacingLeft: 'mr-4',
+    arrowSpacingRight: 'ml-4',
   },
   extraLarge: {
     button: 'px-5 py-5',
     icon: 'h-14 w-14',
     arrow: 'h-14 w-14',
     gap: 'gap-4',
+    arrowSpacingLeft: 'mr-4',
+    arrowSpacingRight: 'ml-4',
   },
 } as const;
 
@@ -75,7 +91,7 @@ export default function ButtonLink({
   const sizing = sizeStyles[size];
 
   const arrowElement = variant === 'arrow' ? (
-    <span className={joinClasses(arrowPlacement === 'left' ? 'mr-4' : 'ml-4', 'flex shrink-0 items-center justify-center rounded-full bg-white/[0.08]', sizing.arrow, arrowClassName)}>
+    <span className={joinClasses(arrowPlacement === 'left' ? sizing.arrowSpacingLeft : sizing.arrowSpacingRight, 'flex shrink-0 items-center justify-center rounded-full bg-white/[0.08]', sizing.arrow, arrowClassName)}>
       <motion.span
         initial={false}
         animate={{ x: isHovered ? (arrowPlacement === 'left' ? -4 : 4) : 0 }}

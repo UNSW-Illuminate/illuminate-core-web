@@ -1,18 +1,90 @@
+// Mirror deployments set SITE_NOINDEX=true (see app/site-config.ts). The
+// page-level metadata already carries the directive; this header repeats it on
+// every response, including ones with no <head> to put a meta tag in — images,
+// sitemap.xml, and error pages.
+const isNoindex =
+  (process.env.SITE_NOINDEX ?? process.env.NEXT_PUBLIC_NOINDEX) === 'true';
+const isProduction = process.env.NODE_ENV === 'production';
+
+const productionSecurityHeaders = isProduction
+  ? [
+      {
+        key: 'Strict-Transport-Security',
+        value: 'max-age=63072000; includeSubDomains; preload',
+      },
+      {
+        key: 'Content-Security-Policy',
+        value: [
+          "default-src 'self'",
+          "base-uri 'self'",
+          "object-src 'none'",
+          "frame-ancestors 'none'",
+          "form-action 'self'",
+          "img-src 'self' data: blob:",
+          "font-src 'self'",
+          "connect-src 'self'",
+          "script-src 'self' 'unsafe-inline'",
+          "style-src 'self' 'unsafe-inline'",
+          "worker-src 'self' blob:",
+          'upgrade-insecure-requests',
+        ].join('; '),
+      },
+    ]
+  : [];
+
+const publicAssetCacheHeaders = [
+  '/projectImages/:path*',
+  '/team/:path*',
+  '/logos/:path*',
+  '/icons/:path*',
+  '/favicon/:path*',
+  '/PPNeueMontreal-Book.woff2',
+].map((source) => ({
+  source,
+  headers: [
+    {
+      key: 'Cache-Control',
+      value: 'public, max-age=86400, stale-while-revalidate=604800',
+    },
+  ],
+}));
+
+const noindexHeaders = isNoindex
+  ? [
+      {
+        source: '/:path*',
+        headers: [
+          { key: 'X-Robots-Tag', value: 'noindex, nofollow, noarchive, noimageindex' },
+        ],
+      },
+    ]
+  : [];
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  poweredByHeader: false,
+  images: {
+    formats: ['image/avif', 'image/webp'],
+    minimumCacheTTL: 86_400,
+  },
   async headers() {
     return [
+      ...noindexHeaders,
+      ...publicAssetCacheHeaders,
       {
-        // Baseline hardening for every response. No CSP yet: the shader editor
-        // and framer-motion inject styles at runtime, so a policy needs testing
-        // before it can be enforced.
+        // Baseline hardening for every response. The production CSP allows the
+        // inline scripts/styles required by Next and framer-motion while still
+        // denying third-party scripts, framing, plugins, and foreign requests.
         source: '/:path*',
         headers: [
           { key: 'X-Content-Type-Options', value: 'nosniff' },
-          { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
+          { key: 'X-Frame-Options', value: 'DENY' },
+          { key: 'X-DNS-Prefetch-Control', value: 'off' },
+          { key: 'Cross-Origin-Opener-Policy', value: 'same-origin' },
           { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
           { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },
+          ...productionSecurityHeaders,
         ],
       },
     ];

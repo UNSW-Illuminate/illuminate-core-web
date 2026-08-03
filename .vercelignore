@@ -1,0 +1,15 @@
+# Keep local secrets out of the uploaded deployment bundle. Without this the
+# CLI ships .env alongside the source and Next.js loads it in the deployed
+# runtime, so local credentials silently become the production ones. Anything
+# the deployment genuinely needs belongs in the Vercel environment variable
+# store instead (`vercel env add`).
+.env
+.env.*
+!.env.example
+
+.next
+node_modules
+.DS_Store
+*.xmp
+.claude
+.agents

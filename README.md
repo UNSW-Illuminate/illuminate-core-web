@@ -3,7 +3,7 @@
 The website for **UNSW Illuminate** — a student showcase of interactive light and
 art installations. The landing page renders a full-screen WebGL gradient that reacts
 to the cursor and scroll position; individual installations live on data-driven
-project pages; and a password-gated `/admin` dashboard manages the content.
+project pages.
 
 ## Tech stack
 
@@ -30,42 +30,24 @@ app/
   (site)/                     # public marketing site (cursor, page transitions, footer, smooth scroll)
     page.tsx                  # landing page sections
     [projectSlug]/            # /<slug> — project pages generated from projects-data.ts
-  admin/                      # password-gated dashboard (own layout, no marketing chrome)
-  api/admin/                  # login / logout route handlers (cookie session)
   components/                 # shared components incl. ShaderGradient, ProjectPageLayout
     ui/                       # reusable primitives — TransitionLink, ButtonLink, ImageLightbox…
-  hooks/                      # useShaderSettings, useScrollColor, useViewTransitionNavigate
+  hooks/                      # useScrollColor, useViewTransitionNavigate
   projects-data.ts            # single source of truth for project content
   team-data.ts                # committed seed for the team roster
-middleware.ts                 # gates everything under /admin
 ```
 
-Routing note: project pages live at the root, `/<slug>`. The public site sits in a
-`(site)` route group so `/admin` can opt out of the global cursor, footer, and
-smooth-scroll chrome.
+Routing note: project pages live at the root, `/<slug>`.
 
 ## The shader background
 
 `app/components/ShaderGradient.tsx` paints a full-screen WebGL 2 gradient behind the
-whole site. It supports spectral and custom colour modes, grain/ripple effects, a
-cursor trail, and scroll-linked vertical movement (with reduced grain on mobile).
-Runtime values come from `app/hooks/useShaderSettings.ts` (`DEFAULT_SETTINGS`),
-persisted to `localStorage` under `illuminate-settings`.
+whole site. It uses a spectral colour mode with grain/ripple effects, a cursor trail,
+and scroll-linked vertical movement (with reduced grain on mobile).
+Its fixed runtime values live alongside the renderer in `ShaderGradient.tsx`.
 
 If WebGL 2 is unavailable or the program fails to compile, the component falls back to
 a static CSS gradient so the page is never blank.
-
-### Shader editor
-
-A live tuning panel ships with the landing page but stays hidden for normal visitors.
-Open it with **`Cmd/Ctrl + .`** or by visiting **`/?editor`**; close with `Esc`.
-
-It offers grouped sliders with precise numeric inputs (animation, cursor, texture,
-spectral), colour-mode and custom-colour pickers, and per-control reset. Edits
-**auto-save** to `localStorage` (debounced), so tuned values become the page defaults.
-Use **Copy JSON** / **Import** to move a configuration between machines, or **Reset
-all** to return to defaults. To make the panel always visible, render `ShaderEditor`
-unconditionally instead of gating on the shortcut/URL.
 
 ## Motion and navigation
 
@@ -111,25 +93,12 @@ Project pages are data-driven from `projectPageSeeds` in `app/projects-data.ts`.
 The route, gallery, and prev/next navigation are generated automatically — no routing
 changes needed.
 
-## Admin dashboard
+## Deployment and search visibility
 
-A dark dashboard at **`/admin`** manages content. Auth is a cookie session
-(`middleware.ts` + `app/api/admin/*`). Credentials are **`admin` / `admin`** for now —
-swap the hardcoded values in `app/admin/auth-constants.ts` for environment variables
-before any real deployment.
-
-- **Projects** — image-thumbnail cards. Editing opens a two-pane view: a form beside a
-  **live preview** of the `/<slug>` page that updates as you type. Project
-  images are previewed from `public/projectImages/<slug>/` (read-only here).
-- **Team** — create/edit/remove members and **upload photos** (seeded from
-  `app/team-data.ts`).
-
-### Persistence
-
-Admin changes are **localStorage-only** (per-browser) — they don't change what visitors
-see, and uploaded team photos are stored as data URLs. Use **Copy JSON** in the Projects
-section to export edits back into `app/projects-data.ts`. Promoting the admin to a server
-file or database is the next step for making edits go live.
+Copy `.env.example` into the deployment platform's environment-variable store;
+never commit a populated `.env` file. `SITE_URL` is the canonical production origin
+used by metadata, structured data, `robots.txt`, and `sitemap.xml`. Set
+`SITE_NOINDEX=true` on previews or mirrors that must not appear in search results.
 
 ## Conventions
 
