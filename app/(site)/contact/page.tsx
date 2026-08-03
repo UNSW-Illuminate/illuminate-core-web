@@ -33,7 +33,7 @@ export const metadata: Metadata = {
   },
 };
 
-const CONTACT_EMAIL = 'admin@unswilluminate.com';
+const CONTACT_EMAIL = 'unswilluminate@gmail.com';
 
 const socials = [
   { name: 'Instagram', href: 'https://www.instagram.com/unswilluminate/' },
