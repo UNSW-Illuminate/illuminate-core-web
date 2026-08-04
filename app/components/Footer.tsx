@@ -9,7 +9,7 @@ const footerLinks = [
   { label: 'Projects', href: '/#projects' },
   { label: 'Team', href: '/team' },
   { label: 'Contact', href: '/contact' },
-  { label: 'Join Us', href: 'mailto:admin@unswilluminate.com?subject=Join%20UNSW%20Illuminate' },
+  { label: 'Join Us', href: 'mailto:unswilluminate@gmail.com?subject=Join%20UNSW%20Illuminate' },
 ];
 
 const partnerLinks = [
@@ -55,10 +55,10 @@ export default function Footer() {
               Interactive experiences shaped by students, partners, and emerging creative technology.
             </SectionHeading>
             <AnimatedTextLink
-              href="mailto:admin@unswilluminate.com"
+              href="mailto:unswilluminate@gmail.com"
               className="mt-6 text-base text-white/80 transition-colors hover:text-white"
             >
-              admin@unswilluminate.com
+              unswilluminate@gmail.com
             </AnimatedTextLink>
           </div>
 
