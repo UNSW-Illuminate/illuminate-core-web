@@ -2,6 +2,7 @@
 
 import Image from 'next/image';
 import { motion } from 'framer-motion';
+import { trackProjectSelection, type ProjectSelectionSource } from '@/app/analytics';
 import SectionHeading from './ui/SectionHeading';
 import TransitionLink from './ui/TransitionLink';
 
@@ -19,6 +20,10 @@ export type ProjectCardItem = {
 
 type ProjectCardProps = {
   project: ProjectCardItem;
+  /** Identifies which project list generated the selection. */
+  sourceSurface: ProjectSelectionSource;
+  /** One-based position within that list. */
+  position: number;
   /** Size hint matched to the grid the card sits in. */
   sizes?: string;
   /** Stagger offset, in seconds, for the scroll-in animation. */
@@ -39,6 +44,8 @@ export const mediaImageClassName =
 
 export default function ProjectCard({
   project,
+  sourceSurface,
+  position,
   sizes = '(min-width: 768px) 50vw, 100vw',
   delay = 0,
 }: ProjectCardProps) {
@@ -53,6 +60,14 @@ export default function ProjectCard({
         href={`/${project.slug}`}
         sharedMediaSlug={project.slug}
         className="group block"
+        onClick={() =>
+          trackProjectSelection({
+            projectSlug: project.slug,
+            projectTitle: project.title,
+            sourceSurface,
+            position,
+          })
+        }
       >
         <div className={`${mediaFrameClassName} aspect-[4/3]`} data-shared-media={project.slug}>
           {project.thumbnail && (

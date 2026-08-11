@@ -2,12 +2,14 @@
 
 import Image from 'next/image';
 import { motion } from 'framer-motion';
-import { useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
+import { trackEvent } from '@/app/analytics';
+import { useProjectEngagement } from '@/app/hooks/useProjectEngagement';
 import OtherProjects from './OtherProjects';
 import { type ProjectCardItem } from './ProjectCard';
 import ButtonLink from './ui/ButtonLink';
 import ContentContainer from './ui/ContentContainer';
-import ImageLightbox from './ui/ImageLightbox';
+import ImageLightbox, { type GalleryNavigationMethod } from './ui/ImageLightbox';
 import SectionHeading from './ui/SectionHeading';
 import SectionLabel from './ui/SectionLabel';
 
@@ -85,6 +87,87 @@ export default function ProjectPageLayout({
   allProjects,
 }: ProjectPageLayoutProps) {
   const [activeImageIndex, setActiveImageIndex] = useState<number | null>(null);
+  const galleryOpenedAtRef = useRef<number | null>(null);
+  const galleryViewedIndicesRef = useRef<Set<number>>(new Set());
+  const trackProjectEngagement = useProjectEngagement({
+    projectSlug: currentSlug,
+    projectTitle: title,
+  });
+
+  const openGallery = useCallback(
+    (index: number, imageSource: 'hero' | 'gallery') => {
+      if (index < 0 || index >= galleryImages.length) {
+        return;
+      }
+
+      galleryOpenedAtRef.current = Date.now();
+      galleryViewedIndicesRef.current = new Set([index]);
+
+      trackEvent('gallery_open', {
+        project_slug: currentSlug,
+        project_title: title,
+        image_index: index + 1,
+        image_count: galleryImages.length,
+        image_source: imageSource,
+      });
+      trackEvent('gallery_image_view', {
+        project_slug: currentSlug,
+        project_title: title,
+        image_index: index + 1,
+        image_count: galleryImages.length,
+        unique_images_viewed: 1,
+        unique_image: true,
+        navigation_method: 'open',
+      });
+
+      trackProjectEngagement('gallery_open');
+      setActiveImageIndex(index);
+    },
+    [currentSlug, galleryImages.length, title, trackProjectEngagement],
+  );
+
+  const navigateGallery = useCallback(
+    (index: number, method: GalleryNavigationMethod) => {
+      const viewedIndices = galleryViewedIndicesRef.current;
+      const isUniqueImage = !viewedIndices.has(index);
+
+      viewedIndices.add(index);
+      trackEvent('gallery_image_view', {
+        project_slug: currentSlug,
+        project_title: title,
+        image_index: index + 1,
+        image_count: galleryImages.length,
+        unique_images_viewed: viewedIndices.size,
+        unique_image: isUniqueImage,
+        navigation_method: method,
+      });
+
+      setActiveImageIndex(index);
+    },
+    [currentSlug, galleryImages.length, title],
+  );
+
+  const closeGallery = useCallback(() => {
+    const openedAt = galleryOpenedAtRef.current;
+
+    if (openedAt !== null) {
+      const imagesViewed = galleryViewedIndicesRef.current.size;
+
+      trackEvent('gallery_close', {
+        project_slug: currentSlug,
+        project_title: title,
+        images_viewed: imagesViewed,
+        image_count: galleryImages.length,
+        gallery_depth_percent:
+          galleryImages.length === 0 ? 0 : Math.round((imagesViewed / galleryImages.length) * 100),
+        open_seconds: Math.round((Date.now() - openedAt) / 1000),
+      });
+    }
+
+    galleryOpenedAtRef.current = null;
+    galleryViewedIndicesRef.current = new Set();
+    setActiveImageIndex(null);
+  }, [currentSlug, galleryImages.length, title]);
 
   // Keep each image's position in the flat gallery list so the lightbox opens
   // on whichever image was clicked and can page through the rest.
@@ -178,7 +261,7 @@ export default function ProjectPageLayout({
                 aria-label={`Enlarge ${heroImage.alt}`}
                 className={`${enlargeableImageClassName} order-1 md:order-none`}
                 data-shared-media={currentSlug}
-                onClick={() => setActiveImageIndex(heroIndex === -1 ? 0 : heroIndex)}
+                onClick={() => openGallery(heroIndex === -1 ? 0 : heroIndex, 'hero')}
               >
                 <Image
                   src={heroImage.src}
@@ -223,7 +306,7 @@ export default function ProjectPageLayout({
                       type="button"
                       aria-label={`Enlarge ${group[0].image.alt}`}
                       className={enlargeableImageClassName}
-                      onClick={() => setActiveImageIndex(group[0].index)}
+                      onClick={() => openGallery(group[0].index, 'gallery')}
                     >
                       <Image
                         src={group[0].image.src}
@@ -243,7 +326,7 @@ export default function ProjectPageLayout({
                           type="button"
                           aria-label={`Enlarge ${image.alt}`}
                           className={enlargeableImageClassName}
-                          onClick={() => setActiveImageIndex(index)}
+                          onClick={() => openGallery(index, 'gallery')}
                         >
                           <Image
                             src={image.src}
@@ -335,8 +418,8 @@ export default function ProjectPageLayout({
       <ImageLightbox
         images={galleryImages}
         activeIndex={activeImageIndex}
-        onClose={() => setActiveImageIndex(null)}
-        onNavigate={setActiveImageIndex}
+        onClose={closeGallery}
+        onNavigate={navigateGallery}
       />
     </main>
   );

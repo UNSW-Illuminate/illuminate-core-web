@@ -2,6 +2,7 @@
 
 import Image from 'next/image';
 import { motion } from 'framer-motion';
+import { trackProjectSelection } from '@/app/analytics';
 import TransitionLink from './ui/TransitionLink';
 import ProjectCard, {
   mediaFrameClassName,
@@ -42,6 +43,14 @@ export default function ProjectShowcase({ projects }: ProjectShowcaseProps) {
           href={`/${featured.slug}`}
           sharedMediaSlug={featured.slug}
           className="group block"
+          onClick={() =>
+            trackProjectSelection({
+              projectSlug: featured.slug,
+              projectTitle: featured.title,
+              sourceSurface: 'featured',
+              position: 1,
+            })
+          }
         >
           <div
             className={`${mediaFrameClassName} aspect-[4/5] md:aspect-[16/9]`}
@@ -110,7 +119,13 @@ export default function ProjectShowcase({ projects }: ProjectShowcaseProps) {
 
           <div className="mt-8 grid gap-x-8 gap-y-16 md:mt-12 md:grid-cols-2 md:gap-y-24">
             {archive.map((project, index) => (
-              <ProjectCard key={project.slug} project={project} delay={(index % 2) * 0.08} />
+              <ProjectCard
+                key={project.slug}
+                project={project}
+                sourceSurface="archive"
+                position={index + 1}
+                delay={(index % 2) * 0.08}
+              />
             ))}
           </div>
         </div>

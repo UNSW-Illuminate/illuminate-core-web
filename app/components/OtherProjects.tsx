@@ -27,6 +27,8 @@ export default function OtherProjects({ projects, currentSlug }: OtherProjectsPr
             <ProjectCard
               key={project.slug}
               project={project}
+              sourceSurface="other_projects"
+              position={index + 1}
               sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
               delay={(index % 3) * 0.08}
             />
