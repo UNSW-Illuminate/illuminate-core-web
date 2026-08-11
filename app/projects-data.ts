@@ -121,7 +121,7 @@ const projectPageSeeds: ProjectPageSeed[] = [
     location: 'Vivid Sydney',
     dates: '2018',
     description:
-      "Synergy captures a stunning moment in nature - a large tree surrounded by ferns. It represents the interlinked mechanisms of a superorganism. In these complex beings, inconspicuous organisms demonstrate emergent properties by sharing signals and nutrients for the greater good of the collective. \n\nIn Synergy, this survival mechanism is demonstrated by the illumination of the ferns which are triggered by the passage of visitors along the path.",
+      "Synergy brings to life the story of how a forest works as a single organism.\n\nUnderground, root systems connect trees to one another, allowing them to share signals and nutrients across the whole network. The installation responds visually: light pulses along the roots towards the central tree, and the ferns begin to animate in response, as though the tree has passed on a warning. Each fern lights up when a visitor comes close, then fades again.\n\nSynergy is an image of collective behaviour. It only comes to life when multiple participants engage at the same time, and that shared experience is what stays with the audience.",
   },
   {
     slug: 'resonance',
@@ -155,7 +155,7 @@ const projectPageSeeds: ProjectPageSeed[] = [
     location: 'UNSW Kensington',
     dates: '2020',
     description:
-      "As one walks into the 'Secret Garden', iridescent stars above flicker delicately and shyly dance amongst the breeze. Laneway takes the most magnificent part of the night sky and leads curious minds down a path into the 'Secret Garden', hidden away from the main area of the UNSW Kensington campus.\n\nLaneway was commissioned as part of the UNSW Estate Management's Secret Garden Project to transform a small area of the campus into a lively meeting spot at the university. The stars hang down from above and are able to dance in the breeze, reflecting light onto the surrounding buildings. The fairytale-like experience stimulates a sense of tranquility and wonder before transitioning into a jubilant space where individuals come together and interact, far away from troubles and worries.",
+      "Laneway was commissioned as part of UNSW Estate Management’s Secret Garden Project, transforming a small area of the campus into a lively meeting place. The fairytale-like experience inspires a sense of tranquillity and wonder before opening into a jubilant space where people can come together and interact, far from their troubles and worries.\n\nAs visitors enter the Secret Garden, iridescent stars flicker delicately overhead and dance in the wind. Laneway takes the most magnificent part of the night sky and leads curious minds down a path into the Secret Garden, hidden away from the main area of UNSW’s Kensington campus.",
   },
   {
     slug: 'celestial-pancake',
@@ -166,7 +166,7 @@ const projectPageSeeds: ProjectPageSeed[] = [
     location: 'Vivid Sydney',
     dates: '2019',
     description:
-      "Celestial Pancake is a suspended audio-visual installation that visitors can walk under. It is composed of a four-meter radius ‘ceiling’ with fiber optics and an evolving four-point soundtrack. From afar, the whole terminal is bathed in washes of light, drawing people in and encouraging them to pause reflectively. Set to alternating colour palettes inspired by space phenomenon that enchanted us as kids, the installation transports a slice of the sky and brings it to us on the ground.\n\nProject Illuminate for 2019 was formed by three major teams, the art & design team, technical team and administration team. The student project group consists upwards of 90 students who participate in artistic design, engineering design, manufacturing, operations and marketing.",
+      "Celestial Pancake is a suspended audiovisual light installation that engages with the childlike wonder of gazing into a starry sky. The artwork transports a slice of the night sky for us to gaze into and enjoy.\n\nAs visitors walk beneath the canopy of stars, the optical-fibre lights dance and glow, echoing the exploding stars in the galaxies of our universe. From afar, the whole terminal is bathed in washes of light, drawing people in and encouraging them to pause and reflect. Alternating colour palettes inspired by the celestial phenomena that enchanted us as children complete the experience.",
   },
   {
     slug: 'crystallise',
@@ -177,7 +177,7 @@ const projectPageSeeds: ProjectPageSeed[] = [
     location: 'Vivid Sydney',
     dates: '2017',
     description:
-      "Crystallise is a lighted mural comprising of multi-coloured triangular and quadrilateral forms. The installation appears to as a mosaic, but encourages viewers to come close through displaying randomly generated colours and patterns. As they come into close proximity with the mural, sections of the canvas fade, leaving behind only a pair of wings.\n\nOur main inspiration was Colette Miller’s angel wings murals, which were exhibited as street art in Sydney (Australia), Los Angeles (United States), Juarez (Mexico), Nairobi (Kenya) and many other locations. To Miller, the wings “represent our inner angel” and remind individuals of the pure and good part of the human condition that emerges even as individuals experience trauma and guilt in their lives. The wings’ embodiment of the human spirit challenges individuals to consider their choices as humanity and work towards a greater good.\n\nWe extend Miller’s artwork to different spectrums of humanity, and the idea that everyone has secrets or hidden truths. By having different lighting patterns on the artwork and hiding the pair of wings until observers come in close proximity, the installation allows people to fulfil their desire to find truths within themselves and recognise and cherish their differences.",
+      "Inspired by Colette Miller’s angel-wing murals and the metaphor of wings as our inner angels, Crystallise reminds visitors of the power we hold within ourselves to do good.\n\nAt first glance, the installation appears to be a mosaic of lights. As participants approach, pieces of the LED canvas begin to fade away, leaving only a pair of wings behind.\n\nCrystallise was constructed from lightweight materials including plywood and corflute. Waterproof LED modules and power supplies were controlled by a small microcontroller to transform the lights.",
   },
 
   {
@@ -189,7 +189,7 @@ const projectPageSeeds: ProjectPageSeed[] = [
     location: 'Vivid Sydney',
     dates: '2016',
     description:
-      "The Mondrian Cube was first commissioned for the Vivid Sydney 2016 festival. Taking inspiration from Dutch artist Piet Mondrian and the De Stilj movement, this two-metre-tall interactive lighting installation features bold dark lines enclosing blocks of primary colours. Visitors of the Vivid festival can change the colour arrangement of each side by simply pressing against each rectangular block, thus creating their own Mondrian artwork. \n\n\The installation was wholly built and designed by undergraduate UNSW students from different faculties and disciplines. Though the Mondrian Cube, CREATE encouraged members to push beyond their boundaries and manage a real-life engineering project, allowing them to develop valuable skills through student collaboration.",
+      "The Mondrian Cube was commissioned for the Vivid Sydney 2016 festival. Inspired by Dutch artist Piet Mondrian and the De Stijl movement, this two-metre-tall interactive light installation features bold, dark lines surrounding blocks of primary colour. Visitors can change the colour arrangement on each side by pressing individual rectangular blocks, creating their own Mondrian artwork.\n\nUndergraduate UNSW students from several faculties and disciplines developed and delivered the installation. By managing a real-world engineering project, the students gained vital skills through teamwork and collaboration.",
   },
 
   {
@@ -201,7 +201,7 @@ const projectPageSeeds: ProjectPageSeed[] = [
     location: 'Uncontained Festival',
     dates: '2023',
     description:
-      "From the straw-like reeds that plucker along banks of the river to the shoots of bamboo sprouting in plant boxes of nearby suburban homes, “Paralanguage” draws inspiration from the plants and animals that make up the Georges River catchment area.\n\nThese illustrations are encapsulated in the gentle symphony of colorful lights and an ambient soundscape of rustling leaves, flowing streams, and bird songs. We aim to foster a dialogue between the self and the environment; the audience and the artwork and creating an experience that aims to deepen one’s appreciation of the environment and strengthen the bridge between nature and our ever-advancing society.",
+      "Paralanguage was commissioned by Georges River Council as a focal artwork for the opening event of Uncontained.\n\nFrom the straw-like reeds lining the riverbanks to the shoots of bamboo sprouting in planter boxes outside nearby suburban homes, Paralanguage draws inspiration from the plants and animals of the Georges River catchment. These illustrations are brought to life through a gentle symphony of colourful lights and an ambient soundscape of rustling leaves, flowing streams and birdsong.\n\nThe artwork creates a dialogue between the self and the environment, and between the audience and the artwork, deepening our appreciation of the natural world.",
   },
 
   {

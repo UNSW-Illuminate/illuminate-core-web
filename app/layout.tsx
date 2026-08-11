@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import type { Viewport } from 'next';
 import localFont from 'next/font/local';
+import Script from 'next/script';
 import {
   DEFAULT_SOCIAL_IMAGE,
   PUBLIC_ROBOTS,
@@ -11,6 +12,8 @@ import {
   absoluteUrl,
 } from './site-config';
 import './globals.css';
+
+const GOOGLE_ANALYTICS_ID = 'G-XJWTDJ6QS8';
 
 const ppNeueMontreal = localFont({
   src: '../public/PPNeueMontreal-Book.woff2',
@@ -122,6 +125,18 @@ export default function RootLayout({
   return (
     <html lang="en-AU">
       <body className={`${ppNeueMontreal.className} m-0 overflow-x-hidden p-0`}>
+        <Script
+          src={`https://www.googletagmanager.com/gtag/js?id=${GOOGLE_ANALYTICS_ID}`}
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', '${GOOGLE_ANALYTICS_ID}');
+          `}
+        </Script>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{

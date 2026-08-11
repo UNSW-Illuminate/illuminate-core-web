@@ -10,12 +10,14 @@ export type LightboxImage = {
   alt: string;
 };
 
+export type GalleryNavigationMethod = 'button' | 'keyboard' | 'swipe';
+
 type ImageLightboxProps = {
   images: LightboxImage[];
   /** Index of the image being viewed, or null while the lightbox is closed. */
   activeIndex: number | null;
   onClose: () => void;
-  onNavigate: (index: number) => void;
+  onNavigate: (index: number, method: GalleryNavigationMethod) => void;
 };
 
 const easeOut = [0.22, 1, 0.36, 1] as const;
@@ -75,12 +77,13 @@ export default function ImageLightbox({ images, activeIndex, onClose, onNavigate
   const hasMultiple = images.length > 1;
 
   const goTo = useCallback(
-    (offset: number) => {
+    (offset: number, method: GalleryNavigationMethod) => {
       if (activeIndex === null || !hasMultiple) {
         return;
       }
 
-      onNavigate((activeIndex + offset + images.length) % images.length);
+      const nextIndex = (activeIndex + offset + images.length) % images.length;
+      onNavigate(nextIndex, method);
     },
     [activeIndex, hasMultiple, images.length, onNavigate],
   );
@@ -112,13 +115,13 @@ export default function ImageLightbox({ images, activeIndex, onClose, onNavigate
 
       if (event.key === 'ArrowLeft') {
         event.preventDefault();
-        goTo(-1);
+        goTo(-1, 'keyboard');
         return;
       }
 
       if (event.key === 'ArrowRight') {
         event.preventDefault();
-        goTo(1);
+        goTo(1, 'keyboard');
         return;
       }
 
@@ -193,12 +196,12 @@ export default function ImageLightbox({ images, activeIndex, onClose, onNavigate
                 }}
                 onDragEnd={(_event, info) => {
                   if (info.offset.x <= -SWIPE_THRESHOLD) {
-                    goTo(1);
+                    goTo(1, 'swipe');
                     return;
                   }
 
                   if (info.offset.x >= SWIPE_THRESHOLD) {
-                    goTo(-1);
+                    goTo(-1, 'swipe');
                   }
                 }}
                 onClick={(event) => {
@@ -234,7 +237,7 @@ export default function ImageLightbox({ images, activeIndex, onClose, onNavigate
                   className={`${controlClassName} absolute left-2 top-1/2 -translate-y-1/2 md:left-6`}
                   onClick={(event) => {
                     event.stopPropagation();
-                    goTo(-1);
+                    goTo(-1, 'button');
                   }}
                 >
                   <Image
@@ -253,7 +256,7 @@ export default function ImageLightbox({ images, activeIndex, onClose, onNavigate
                   className={`${controlClassName} absolute right-2 top-1/2 -translate-y-1/2 md:right-6`}
                   onClick={(event) => {
                     event.stopPropagation();
-                    goTo(1);
+                    goTo(1, 'button');
                   }}
                 >
                   <Image
