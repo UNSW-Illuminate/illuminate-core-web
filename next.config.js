@@ -6,6 +6,18 @@ const isNoindex =
   (process.env.SITE_NOINDEX ?? process.env.NEXT_PUBLIC_NOINDEX) === 'true';
 const isProduction = process.env.NODE_ENV === 'production';
 
+// Google Analytics 4 (gtag.js) origins, per Google's documented CSP guidance.
+// The tag is loaded from googletagmanager.com, sends its hits to
+// google-analytics.com / analytics.google.com (both regionalised behind
+// wildcards, e.g. region1.google-analytics.com), and falls back to an image
+// beacon when fetch/beacon is unavailable — so all three directives below need
+// the origins or the tag silently does nothing and never sets the _ga cookie.
+const GOOGLE_ANALYTICS_SCRIPT_ORIGINS = 'https://*.googletagmanager.com';
+const GOOGLE_ANALYTICS_CONNECT_ORIGINS =
+  'https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com';
+const GOOGLE_ANALYTICS_IMAGE_ORIGINS =
+  'https://*.google-analytics.com https://*.googletagmanager.com';
+
 const productionSecurityHeaders = isProduction
   ? [
       {
@@ -20,10 +32,10 @@ const productionSecurityHeaders = isProduction
           "object-src 'none'",
           "frame-ancestors 'none'",
           "form-action 'self'",
-          "img-src 'self' data: blob:",
+          `img-src 'self' data: blob: ${GOOGLE_ANALYTICS_IMAGE_ORIGINS}`,
           "font-src 'self'",
-          "connect-src 'self'",
-          "script-src 'self' 'unsafe-inline'",
+          `connect-src 'self' ${GOOGLE_ANALYTICS_CONNECT_ORIGINS}`,
+          `script-src 'self' 'unsafe-inline' ${GOOGLE_ANALYTICS_SCRIPT_ORIGINS}`,
           "style-src 'self' 'unsafe-inline'",
           "worker-src 'self' blob:",
           'upgrade-insecure-requests',
