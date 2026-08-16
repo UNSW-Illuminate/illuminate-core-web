@@ -61,6 +61,31 @@ const publicAssetCacheHeaders = [
   ],
 }));
 
+// Project slugs that changed on the way to this site. The old slug is the key,
+// so /projects/<old>, /<old>, and their trailing-slash forms all land on the
+// current page instead of 404ing through the generic /projects rule below.
+const LEGACY_PROJECT_SLUGS = {
+  heartstrings: 'heartstring',
+};
+
+const legacyProjectSlugRedirects = Object.entries(LEGACY_PROJECT_SLUGS).flatMap(
+  ([legacySlug, currentSlug]) =>
+    [`/projects/${legacySlug}`, `/${legacySlug}`].map((source) => ({
+      source,
+      destination: `/${currentSlug}`,
+      permanent: true,
+    })),
+);
+
+// Pages the previous site had that this one does not. /projects still carries
+// external backlinks, so each one points at the closest surviving page rather
+// than dead-ending.
+const retiredPageRedirects = [
+  { source: '/projects', destination: '/#projects' },
+  { source: '/events', destination: '/#projects' },
+  { source: '/about', destination: '/team' },
+].map((redirect) => ({ ...redirect, permanent: true }));
+
 const noindexHeaders = isNoindex
   ? [
       {
@@ -102,7 +127,11 @@ const nextConfig = {
     ];
   },
   async redirects() {
+    // Order matters: Next.js uses the first matching rule, so the renamed
+    // slugs have to be listed before the catch-all /projects/:projectSlug.
     return [
+      ...legacyProjectSlugRedirects,
+      ...retiredPageRedirects,
       // Project pages moved from /projects/<slug> to /<slug>; keep old links alive.
       {
         source: '/projects/:projectSlug',
