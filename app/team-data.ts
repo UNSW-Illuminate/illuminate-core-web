@@ -21,13 +21,12 @@ export type TeamMember = {
 
 /**
  * The four disciplines a member joins. Each one maps to a technical lead above,
- * and the copy doubles as the recruitment pitch on /contact.
+ * and the names are listed again on /contact.
  */
 export type Portfolio = {
   id: string;
   name: string;
   tagline: string;
-  description: string;
 };
 
 export const portfolios: Portfolio[] = [
@@ -35,29 +34,21 @@ export const portfolios: Portfolio[] = [
     id: 'art-and-design',
     name: 'Art & Design',
     tagline: 'Concept, form, and finish',
-    description:
-      'Art & Design defines what the installation is before the engineering begins. The portfolio takes a concept through sketches, mood boards, colour studies, and scale models until there is a form to build, then stays with it through materials, finishes, and the graphics and signage around the finished piece. Members come from art, media, architecture, and engineering.',
   },
   {
     id: 'mechanical',
     name: 'Mechanical',
     tagline: 'Structure, fabrication, and installation',
-    description:
-      'Mechanical turns a design into a structure that holds up outdoors for the length of a season. The portfolio works in CAD, laser cutting, 3D printing, and fabrication, sizing frames and fixings for wind and weight, then plans how a build breaks down for transport, install, and pack-out. Most of the work happens in the workshop.',
   },
   {
     id: 'electrical',
     name: 'Electrical',
     tagline: 'Power, wiring, and light output',
-    description:
-      'Electrical delivers the light itself. The portfolio designs power budgets and distribution, builds wiring looms and custom PCBs, and drives the addressable LEDs, fibre optics, and sensors that make a piece react to the people around it. The work runs from soldering and bench testing to festival-grade installations that run unattended every night for weeks.',
   },
   {
     id: 'software',
     name: 'Software',
     tagline: 'Firmware, interaction, and behaviour',
-    description:
-      'Software writes the behaviour. The portfolio programs the microcontrollers behind each piece, maps sensor input to light output, and builds the animation systems that let the design team tune a look without touching code — the ripple that travels through the grasses in Resonance, the RFID handshake that changes the projection in Viscera. Experience ranges from first-year students learning embedded C upwards.',
   },
 ];
 

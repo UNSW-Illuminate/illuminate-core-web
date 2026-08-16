@@ -110,19 +110,16 @@ export default function TeamPage() {
             <div className="mt-14 md:mt-20">
               {portfolios.map((portfolio, index) => (
                 <RevealOnScroll key={portfolio.id} delay={0.04}>
-                  <div className="grid gap-6 py-10 md:grid-cols-[auto_1fr_1.4fr] md:gap-12 md:py-14">
+                  <div className="grid gap-2 py-10 md:grid-cols-[auto_1fr_1.4fr] md:items-baseline md:gap-12 md:py-14">
                     <p className="text-sm text-white/35 md:text-base">
                       {String(index + 1).padStart(2, '0')}
                     </p>
 
-                    <div>
-                      <SectionHeading as="h3" className="text-3xl md:text-4xl">
-                        {portfolio.name}
-                      </SectionHeading>
-                      <p className="mt-2 text-base text-white/50">{portfolio.tagline}</p>
-                    </div>
+                    <SectionHeading as="h3" className="text-3xl md:text-4xl">
+                      {portfolio.name}
+                    </SectionHeading>
 
-                    <p className="text-lg leading-relaxed text-white/80">{portfolio.description}</p>
+                    <p className="text-lg text-white/50">{portfolio.tagline}</p>
                   </div>
                 </RevealOnScroll>
               ))}
